@@ -9,13 +9,6 @@ COPY package*.json ./
 # Instala todas as dependências (prod + dev)
 RUN npm install
 
-RUN npm install react react-dom
-
-RUN npm install -D @types/react @types/react-dom typescript
-
-RUN npm install --save-dev typescript @types/react @types/react-dom
-
-
 # Copia todo o código fonte
 COPY . .
 

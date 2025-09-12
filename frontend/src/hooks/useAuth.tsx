@@ -1,18 +1,11 @@
 import { useContext } from "react";
-import { AuthContext } from "../contexts/auth";
+import { AuthContext, User } from "../contexts/auth";
 
-// Tipagem do usuário
-interface User {
-  email: string;
-  senha: string;
-}
-
-// Tipagem do contexto
 interface AuthContextType {
   user: User | null;
   signed: boolean;
-  login: (email: string, senha: string) => string | void;
-  cadastro: (email: string, senha: string) => string | void;
+  login: (email: string, senha: string) => Promise<string | void>;
+  cadastro: (name: string, email: string, senha: string) => Promise<string | void>;
   logout: () => void;
 }
 

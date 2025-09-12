@@ -1,17 +1,26 @@
+// frontend/contexts/auth.tsx
 import { createContext, useEffect, useState, FC, ReactNode } from "react";
+import axios from "axios";
 
 // Tipagem do usuário
-interface User {
+export interface User {
+  name: string;
   email: string;
   senha: string;
+}
+
+// Tipagem da resposta do backend
+interface AuthResponse {
+  user: User;
+  token: string;
 }
 
 // Tipagem do contexto de autenticação
 interface AuthContextType {
   user: User | null;
   signed: boolean;
-  login: (email: string, senha: string) => string | void;
-  cadastro: (email: string, senha: string) => string | void;
+  login: (email: string, senha: string) => Promise<string | void>;
+  cadastro: (name: string, email: string, senha: string) => Promise<string | void>;
   logout: () => void;
 }
 
@@ -27,54 +36,63 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  // Verifica se já existe token no localStorage
+  // Carrega token ao iniciar
   useEffect(() => {
     const userToken = localStorage.getItem("user_token");
-    const userStorage = localStorage.getItem("users_db");
-
-    if (userToken && userStorage) {
-      const hasUser = JSON.parse(userStorage).filter(
-        (u: User) => u.email === JSON.parse(userToken).email
-      );
-
-      if (hasUser.length > 0) setUser(hasUser[0]);
+    if (userToken) {
+      const tokenData: { email: string; token: string } = JSON.parse(userToken);
+      setUser({ name: "", email: tokenData.email, senha: "" });
     }
   }, []);
 
   // Função de login
-  const login = (email: string, senha: string): string | void => {
-    const userStorage: User[] = JSON.parse(localStorage.getItem("users_db") || "[]");
+  const login = async (email: string, senha: string): Promise<string | void> => {
+    try {
+      const response = await axios.post<AuthResponse>(
+        `${import.meta.env.VITE_API_URL}/login`,
+        { email, password: senha }
+      );
 
-    const hasUser = userStorage.filter((u) => u.email === email);
+      if (response.status === 200) {
+        const loggedUser = response.data.user;
+        const token = response.data.token;
 
-    if (hasUser.length) {
-      if (hasUser[0].senha === senha) {
-        const token = Math.random().toString(36).substring(2);
+        // Salva token
         localStorage.setItem("user_token", JSON.stringify({ email, token }));
-        setUser({ email, senha });
+        setUser(loggedUser);
+
         return;
       } else {
         return "E-mail ou senha incorretos";
       }
-    } else {
-      return "Usuário não cadastrado no sistema, faça seu cadastro para acessar a plataforma";
+    } catch (err: any) {
+      return err.response?.data?.message || "Erro ao conectar com o servidor";
     }
   };
 
   // Função de cadastro
-  const cadastro = (email: string, senha: string): string | void => {
-    const userStorage: User[] = JSON.parse(localStorage.getItem("users_db") || "[]");
+  const cadastro = async (name: string, email: string, senha: string): Promise<string | void> => {
+    try {
+      const response = await axios.post<AuthResponse>(
+        `${import.meta.env.VITE_API_URL}/Usuario`, // Corrigido: adiciona a variável de ambiente
+        { name, email, password: senha }
+      );
 
-    const hasUser = userStorage.filter((u) => u.email === email);
+      if (response.status === 201 || response.status === 200) {
+        const newUser = response.data.user;
+        const token = response.data.token;
 
-    if (hasUser.length) {
-      return "Já existe uma conta cadastrada com esse e-mail";
+        // Salva token
+        localStorage.setItem("user_token", JSON.stringify({ email, token }));
+        setUser(newUser);
+
+        return;
+      } else {
+        return "Erro ao cadastrar usuário";
+      }
+    } catch (err: any) {
+      return err.response?.data?.message || "Erro ao conectar com o servidor";
     }
-
-    const newUser = [...userStorage, { email, senha }];
-    localStorage.setItem("users_db", JSON.stringify(newUser));
-
-    return;
   };
 
   // Função de logout
