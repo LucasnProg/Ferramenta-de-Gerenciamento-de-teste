@@ -44,6 +44,7 @@ services:
     networks:
       - projeto_network
 
+
   frontend:
     build:
       context: ./frontend
@@ -52,7 +53,7 @@ services:
     depends_on:
       - backend
     environment:
-      - VITE_API_URL=http://localhost:4000
+      - VITE_API_URL=http://backend:4000
     ports:
       - "3000:80"
     networks:
