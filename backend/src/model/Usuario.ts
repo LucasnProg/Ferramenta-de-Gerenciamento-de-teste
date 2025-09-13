@@ -7,8 +7,16 @@ export class Usuario {
     private email : string;
     private password : string;
 
-    private static encryptionKey = crypto.randomBytes(32); 
-    private static iv = crypto.randomBytes(16); 
+    //Verifica se as variaveis de encriptacao estao definidas
+    static {
+        if (!process.env.ENCRYPTION_KEY || !process.env.ENCRYPTION_IV) {
+            throw new Error("Chaves de criptografia não definidas no ambiente (.env).");
+        }
+    }
+
+    // Converte as chaves de string hexadecimal para Buffer, que é o que o crypto usa.
+    private static encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, 'hex');
+    private static iv = Buffer.from(process.env.ENCRYPTION_IV!, 'hex');  
 
     constructor (valueName : string, valueEmail : string, valuePassword : string, valueId? : string){
         this.id = valueId ? new Uuid(valueId) : Uuid.randomGenerator();
