@@ -71,29 +71,17 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Função de cadastro
-  const cadastro = async (name: string, email: string, senha: string): Promise<string | void> => {
-    try {
-      const response = await axios.post<AuthResponse>(
-        `${import.meta.env.VITE_API_URL}/Usuario`, // Corrigido: adiciona a variável de ambiente
-        { name, email, password: senha }
-      );
+  const cadastro = async (name: string, email: string, password: string) => {
+    const response = await fetch("http://localhost:4000/usuario", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+    });
 
-      if (response.status === 201 || response.status === 200) {
-        const newUser = response.data.user;
-        const token = response.data.token;
-
-        // Salva token
-        localStorage.setItem("user_token", JSON.stringify({ email, token }));
-        setUser(newUser);
-
-        return;
-      } else {
-        return "Erro ao cadastrar usuário";
-      }
-    } catch (err: any) {
-      return err.response?.data?.message || "Erro ao conectar com o servidor";
-    }
+    const data = await response.json();
+    if (!response.ok) return data.error;
   };
+
 
   // Função de logout
   const logout = () => {

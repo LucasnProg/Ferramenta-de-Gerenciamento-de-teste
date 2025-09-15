@@ -15,25 +15,35 @@ const Cadastro = () => {
 
   const { cadastro } = useAuth();
 
-  const handleSignup = async () => {
-    if (!name || !email || !senha || !senhaConf) {
-      setError("Preencha todos os campos");
-      return;
-    } else if (senha !== senhaConf) {
-      setError("As senhas não são iguais");
-      return;
-    }
+  const handleSignup = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  e.preventDefault();
 
-    const res = await cadastro(name, email, senha);
+  const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-    if (res) {
-      setError(res);
-      return;
-    }
+  if (!name || !email || !senha || !senhaConf) {
+    setError("Preencha todos os campos, para efetuar o cadastro!");
+    return;
+  } else if (senha !== senhaConf) {
+    setError("As senhas não coincidem!");
+    return;
+  }
 
-    alert("Usuário cadastrado com sucesso!");
-    navigate("/");
-  };
+  if (!passwordRegex.test(senha)) {
+    setError("Senha inválida, insira uma senha com no mínimo 8 caracteres, letras maiúsculas e números!");
+    return;
+  }
+
+  const res = await cadastro(name, email, senha);
+
+  if (res) {
+    setError(res);
+    return;
+  }
+
+  alert("Usuário cadastrado com sucesso!");
+  navigate("/");
+};
+
 
   return (
     <C.Container>
@@ -64,7 +74,7 @@ const Cadastro = () => {
           onChange={(e) => { setSenhaConf(e.target.value); setError(""); }}
         />
         <C.labelError>{error}</C.labelError>
-        <Button Text="Inscrever-se" onClick={handleSignup} />
+        <Button Text="Inscrever-se" onClick={handleSignup} Type="button" />
         <C.LabelSignin>
           Já tem uma conta?
           <C.Strong>

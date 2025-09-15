@@ -1,4 +1,5 @@
 import express, { json } from "express";
+import cors from "cors";
 import { router } from "./routes/router.js";
 
 export class Server {
@@ -8,11 +9,20 @@ export class Server {
   constructor() {
     this.app = express();
     this.port = parseInt(process.env.PORT || "4000");
+
+    // Middlewares
     this.app.use(json());
+
+    // CORS
+    this.app.use(cors({
+      origin: '*'  // Permite todas as origens (para dev)
+    }));
+
+    // Rotas
     this.app.use(router);
   }
 
-  public start() {
+  public start(): void {
     this.app.listen(this.port, () => {
       console.log(`Servidor rodando na porta ${this.port}`);
     });

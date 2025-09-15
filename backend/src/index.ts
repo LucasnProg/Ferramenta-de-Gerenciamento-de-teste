@@ -1,4 +1,8 @@
 import { Server } from "./server.js";
 
-const server = new Server();
-server.start(); // Mantém o backend rodando dentro do container
+async function bootstrap() {
+  const server = new Server();
+  await server.start(); 
+}
+
+bootstrap();

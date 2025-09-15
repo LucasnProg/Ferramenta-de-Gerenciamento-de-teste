@@ -13,13 +13,13 @@ const Login = () => {
   const [senha, setSenha] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = () => {
+  const handleLogin = async() => {
     if (!email || !senha) {
       setError("Preencha todos os campos");
       return;
     }
 
-    const res = login(email, senha);
+    const res = await login(email, senha);
 
     if (res) {
       setError(res);

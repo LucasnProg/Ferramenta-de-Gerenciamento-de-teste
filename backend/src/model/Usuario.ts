@@ -57,32 +57,19 @@ export class Usuario {
     }
 
     public setPassword(password: string): void {
-        if (!Usuario.checkPassword(password)) {
-            throw new Error("Senha inválida. Deve ter pelo menos 8 caracteres, uma letra maiúscula e um número");
-        }
         this.password = Usuario.encryptPassword(password);
     }
 
-    static create(name : string, email : string, password : string, userId? : string){
-        if (!this.checkEmail(email)) {
-            throw new Error("Email incorreto, verifique e tente novamente");
-        }
-        if (!this.checkPassword(password)) {
-            throw new Error("Senha inválida. Deve ter pelo menos 8 caracteres, uma letra maiúscula e um número");
-        }
+    static create(name: string, email: string, password: string, id?: string): Usuario {
+        if (!password) throw new Error("Senha inválida");
 
         const encryptedPassword = this.encryptPassword(password);
-        return new Usuario(name, email, encryptedPassword, userId);
+        return new Usuario(name, email, encryptedPassword, id);
     }
 
     static checkEmail(value : string) : boolean {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(value);
-    }
-
-    static checkPassword(value : string) : boolean {
-        const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
-        return passwordRegex.test(value);
     }
 
     static encryptPassword(value : string) : string {

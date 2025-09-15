@@ -1,35 +1,33 @@
-import knex, { Knex } from "knex";
+import { Knex } from "knex";
 import { Usuario } from "../../../model/Usuario";
 import { UserRepository } from "../../../repository/UserRepository";
-import { development } from "./knex";
+import { db } from "./knex"; 
 
-export class UserRepoDb implements UserRepository{
+export class UserRepoDb implements UserRepository {
     private connection: Knex;
 
-    constructor () {
-        this.connection = knex(development);
+    constructor() {
+        this.connection = db;
     }
-    
-    
-    async save(user : Usuario): Promise<void> {
+
+    async save(user: Usuario): Promise<void> {
         await this.connection('usuarios').insert({
-            'id': user.getId().getValue(),
-            'name': user.getName(),
-            'email':user.getEmail(),
-            'password': user.getPassword()
-        })
+            id: user.getId().getValue(),
+            name: user.getName(),
+            email: user.getEmail(),
+            password: user.getPassword(),
+        });
     }
 
     async getAll(): Promise<Array<Usuario>> {
-        const userCollection : Array<Usuario> = [];
+        const userCollection: Array<Usuario> = [];
 
         const usuarios = await this.connection('usuarios').select('*');
 
-        for (let i = 0; i < usuarios.length; i++) {
-            const user = usuarios[i];
-            
-            
-            userCollection.push(Usuario.create(user['name'], user['email'], user['password'], user['id']))   
+        for (const user of usuarios) {
+            userCollection.push(
+                await Usuario.create(user['name'], user['email'], user['password'], user['id'])
+            );
         }
 
         return userCollection;

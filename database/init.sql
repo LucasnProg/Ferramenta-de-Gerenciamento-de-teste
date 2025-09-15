@@ -1,6 +1,9 @@
 -- Cria banco
 CREATE DATABASE IF NOT EXISTS aplicacao_db;
 
+ALTER USER 'appuser'@'%' IDENTIFIED WITH mysql_native_password BY 'password';
+FLUSH PRIVILEGES;
+
 -- Usa o banco
 USE aplicacao_db;
 
