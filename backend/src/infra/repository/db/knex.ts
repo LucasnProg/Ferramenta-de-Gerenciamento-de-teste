@@ -1,13 +1,16 @@
 import Dotenv from "dotenv";
-Dotenv.config(); // vai ler o arquivo .env na raiz do projeto
+Dotenv.config(); // Lê o arquivo .env na raiz do projeto
 
 export const development = {
-    client: 'mysql',
-    connection: {
-        host: process.env.DB_HOST || 'localhost',
-        port: Number(process.env.DB_PORT) || 3306,
-        user: process.env.DB_USER || 'root',
-        password: process.env.DB_PASSWORD || '',
-        database: process.env.DB_NAME || 'usuarios'
-    }
+  client: "mysql2", // mysql2 é obrigatório para MySQL 8+
+  connection: {
+    host: process.env.DATABASE_HOST || "db", // o serviço Docker do MySQL
+    port: Number(process.env.DATABASE_PORT) || 3306,
+    user: process.env.DATABASE_USER || "appuser",
+    password: process.env.DATABASE_PASSWORD || "password",
+    database: process.env.DATABASE_NAME || "aplicacao_db",
+    // Adicionado para evitar erro de Public Key Retrieval
+    ssl: false,
+    insecureAuth: true,
+  },
 };

@@ -1,3 +1,4 @@
-import { Server } from "./server";
+import { Server } from "./server.js";
 
-new Server().getServer().listen(4000)
+const server = new Server();
+server.start(); // Mantém o backend rodando dentro do container

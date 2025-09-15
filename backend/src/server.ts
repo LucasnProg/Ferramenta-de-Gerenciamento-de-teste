@@ -1,18 +1,24 @@
 import express, { json } from "express";
-import dotenv from "dotenv";
-import mysql from "mysql2/promise";
-import { router } from "./routes/router";
+import { router } from "./routes/router.js";
 
-export class Server{
-    private server : express.Application;
+export class Server {
+  public app: express.Application;
+  private port: number;
 
-    constructor() { 
-        this.server = express();
-        this.server.use(json());
-        this.server.use(router);
-    }
+  constructor() {
+    this.app = express();
+    this.port = parseInt(process.env.PORT || "4000");
+    this.app.use(json());
+    this.app.use(router);
+  }
 
-    public getServer() : express.Application{
-        return this.server;
-    }
+  public start() {
+    this.app.listen(this.port, () => {
+      console.log(`Servidor rodando na porta ${this.port}`);
+    });
+  }
+
+  public getServer(): express.Application {
+    return this.app;
+  }
 }
