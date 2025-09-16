@@ -46,29 +46,24 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   // Função de login
-  const login = async (email: string, senha: string): Promise<string | void> => {
+  async function login(email: string, password: string): Promise<string | void> {
     try {
-      const response = await axios.post<AuthResponse>(
-        `${import.meta.env.VITE_API_URL}/login`,
-        { email, password: senha }
-      );
+      const res = await fetch(`http://localhost:4000/usuario/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-      if (response.status === 200) {
-        const loggedUser = response.data.user;
-        const token = response.data.token;
+      const data = await res.json();
+      if (!res.ok) return data.error;
 
-        // Salva token
-        localStorage.setItem("user_token", JSON.stringify({ email, token }));
-        setUser(loggedUser);
-
-        return;
-      } else {
-        return "E-mail ou senha incorretos";
-      }
+      setUser(data);
+      return;
     } catch (err: any) {
-      return err.response?.data?.message || "Erro ao conectar com o servidor";
+      return err.message;
     }
-  };
+  }
+
 
   // Função de cadastro
   const cadastro = async (name: string, email: string, password: string) => {

@@ -1,92 +1,71 @@
 import { Uuid } from "./Uuid";
-import * as crypto from 'crypto';
+import * as crypto from "crypto";
 
-export class Usuario { 
-    private id : Uuid;
-    private name : string;
-    private email : string;
-    private password : string;
+export class Usuario {
+    private id: Uuid;
+    private name: string;
+    private email: string;
+    private password: string; 
 
-    //Verifica se as variaveis de encriptacao estao definidas
-    static {
-        if (!process.env.ENCRYPTION_KEY || !process.env.ENCRYPTION_IV) {
-            throw new Error("Chaves de criptografia não definidas no ambiente (.env).");
-        }
-    }
-
-    // Converte as chaves de string hexadecimal para Buffer, que é o que o crypto usa.
-    private static encryptionKey = Buffer.from(process.env.ENCRYPTION_KEY!, 'hex');
-    private static iv = Buffer.from(process.env.ENCRYPTION_IV!, 'hex');  
-
-    constructor (valueName : string, valueEmail : string, valuePassword : string, valueId? : string){
+    constructor(valueName: string, valueEmail: string, valuePassword: string, valueId?: string) {
         this.id = valueId ? new Uuid(valueId) : Uuid.randomGenerator();
         this.name = valueName;
         this.email = valueEmail;
-        this.password = valuePassword;
+        this.password = valuePassword; 
     }
 
     public getId(): Uuid {
         return this.id;
     }
 
-    public setId(id: string): void {
-        this.id = new Uuid(id);
-    }
-
     public getName(): string {
         return this.name;
-    }
-
-    public setName(name: string): void {
-        this.name = name;
     }
 
     public getEmail(): string {
         return this.email;
     }
 
-    public setEmail(email: string): void {
-        if (!Usuario.checkEmail(email)) {
-            throw new Error("Email inválido");
-        }
-        this.email = email;
-    }
-
     public getPassword(): string {
-        return Usuario.decryptPassword(this.password);
+        return this.password; 
     }
 
     public setPassword(password: string): void {
         this.password = Usuario.encryptPassword(password);
     }
 
+   
     static create(name: string, email: string, password: string, id?: string): Usuario {
-        if (!password) throw new Error("Senha inválida");
+        if (!name || !email || !password) throw new Error("Nome, email e senha são obrigatórios.");
+        if (!Usuario.checkEmail(email)) throw new Error("Email inválido.");
+        if (!Usuario.checkPassword(password)) throw new Error("Senha inválida. Deve ter pelo menos 8 caracteres, uma letra maiúscula e um número.");
 
-        const encryptedPassword = this.encryptPassword(password);
+        const encryptedPassword = Usuario.encryptPassword(password);
         return new Usuario(name, email, encryptedPassword, id);
     }
 
-    static checkEmail(value : string) : boolean {
+    // Regex básico para senha forte
+    static checkPassword(value: string): boolean {
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+        return passwordRegex.test(value);
+    }
+
+    static checkEmail(value: string): boolean {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(value);
     }
 
-    static encryptPassword(value : string) : string {
-        const cipher = crypto.createCipheriv('aes-256-cbc', this.encryptionKey, this.iv);
-        let encrypted = cipher.update(value, 'utf8', 'hex');
-        encrypted += cipher.final('hex');
-        return encrypted;
+    static encryptPassword(password: string): string {
+        const secret = process.env.ENCRYPTION_KEY || "chave-secreta"; 
+        const key = crypto.createHash("sha256").update(secret).digest();
+        const iv = Buffer.alloc(16, 0); 
+        const cipher = crypto.createCipheriv("aes-256-ctr", key, iv);
+        const encrypted = Buffer.concat([cipher.update(password), cipher.final()]);
+        return encrypted.toString("hex");
     }
 
-    static decryptPassword(encryptedValue: string) : string {
-        const decipher = crypto.createDecipheriv('aes-256-cbc', this.encryptionKey, this.iv);
-        let decrypted = decipher.update(encryptedValue, 'hex', 'utf8');
-        decrypted += decipher.final('utf8');
-        return decrypted;
+    static verifyPassword(password: string, hashed: string): boolean {
+        const encrypted = Usuario.encryptPassword(password);
+        return encrypted === hashed;
     }
 }
-/*
-const user = Usuario.create("Lucas", "lucas@example.com", "Senha123");
-console.log("Senha encriptada:", user['password']);
-console.log("Senha decriptada:", Usuario.decryptPassword(user['password']));*/

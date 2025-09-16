@@ -5,7 +5,7 @@ import * as C from "./styles";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 
-const Login = () => {
+const Login: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -13,7 +13,7 @@ const Login = () => {
   const [senha, setSenha] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = async() => {
+  const handleLogin = async () => {
     if (!email || !senha) {
       setError("Preencha todos os campos");
       return;
@@ -26,6 +26,7 @@ const Login = () => {
       return;
     }
 
+    alert("Login realizado com sucesso!");
     navigate("/home");
   };
 
@@ -41,7 +42,6 @@ const Login = () => {
             setEmail(e.target.value);
             setError("");
           }}
-          
         />
         <Input
           type="password"
@@ -51,10 +51,9 @@ const Login = () => {
             setSenha(e.target.value);
             setError("");
           }}
-          
         />
         <C.LabelError>{error}</C.LabelError>
-        <Button Text="Entrar" onClick={handleLogin} />
+        <Button Text="Entrar" onClick={handleLogin} Type="button" />
         <C.LabelCadastro>
           Não tem uma conta?
           <C.Strong>
