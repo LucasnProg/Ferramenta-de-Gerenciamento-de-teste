@@ -1,3 +1,4 @@
+// backend/controller/LoginUser.ts
 import { Request, Response } from "express";
 import { UserRepoDb } from "../infra/repository/db/UserRepoDb";
 import { Usuario } from "../model/Usuario";
@@ -26,23 +27,19 @@ export class LoginUser {
       }
 
       const isValid = Usuario.verifyPassword(password, user.getPassword());
-
       if (!isValid) {
         res.status(401).json({ error: "Senha inválida" });
         return;
       }
 
+      // Retorna usuário e token
       res.status(200).json({
-        message: "Login realizado com sucesso",
-        user: {
-          id: user.getId().getValue(),
-          name: user.getName(),
-          email: user.getEmail(),
-        },
+        user: { name: user.getName(), email: user.getEmail() },
+        token: "token-fake"
       });
+
     } catch (err: any) {
-      console.error("Erro no login:", err);
-      res.status(500).json({ error: "Erro interno no servidor" });
+      res.status(500).json({ error: err.message });
     }
   }
 }

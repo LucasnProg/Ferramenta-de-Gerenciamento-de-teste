@@ -65,7 +65,13 @@ export class Usuario {
     }
 
     static verifyPassword(password: string, hashed: string): boolean {
-        const encrypted = Usuario.encryptPassword(password);
+        const encrypted = this.encryptPassword(password);
         return encrypted === hashed;
     }
+
+    // Adicione no Usuario.ts
+    static fromDatabase(name: string, email: string, encryptedPassword: string, id?: string): Usuario {
+        return new Usuario(name, email, encryptedPassword, id);
+    }
+
 }
