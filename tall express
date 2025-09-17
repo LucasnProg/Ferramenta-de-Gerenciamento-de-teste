@@ -1,0 +1,65 @@
+[33mcommit 18a80cce9bff9504595da0b98fd013b5c4fba2e3[m[33m ([m[1;36mHEAD -> [m[1;32mfeature/quality-metrics[m[33m, [m[1;31morigin/feature/quality-metrics[m[33m, [m[1;31morigin/feature/login[m[33m)[m
+Author: LucasnProg <lucasnprog@gmail.com>
+Date:   Tue Sep 16 12:02:28 2025 -0300
+
+    fix:correções na funcionalidade de login
+
+[33mcommit 6c75cbdf42951e610072609fbe6672b3ed5bd80a[m
+Author: LucasnProg <lucasnprog@gmail.com>
+Date:   Tue Sep 16 11:08:58 2025 -0300
+
+    feat: desevolvimento de conexão do front com o back do login
+
+[33mcommit b6514f32959e9659ef4846e6b55e60498cb9855c[m
+Author: LucasnProg <lucasnprog@gmail.com>
+Date:   Mon Sep 15 19:34:53 2025 -0300
+
+    feat:Cadastro de usuário finalizado
+
+[33mcommit 6ddb23870e8a7ab4fd1b0f4e8900f8f336c0fbe9[m
+Author: LucasnProg <lucasnprog@gmail.com>
+Date:   Mon Sep 15 18:26:50 2025 -0300
+
+    fix:correções nos conteiners
+
+[33mcommit 4b5e21758e643aaf3549072604585722aa2ed664[m
+Author: manoelbbarros <manoelneto400@gmail.com>
+Date:   Sat Sep 13 12:16:30 2025 -0300
+
+    Fix: Criação .env e delete db
+
+[33mcommit f35e1c927ae5da8ae44e0848be56a997749c7b18[m
+Author: manoelbbarros <manoelneto400@gmail.com>
+Date:   Sat Sep 13 11:59:00 2025 -0300
+
+    Fix: Correção do banco de dados e da cryptografia
+
+[33mcommit 481bb3d28b53203cb29a37d9e5d2f77ed136b586[m
+Author: LucasnProg <lucasnprog@gmail.com>
+Date:   Fri Sep 12 17:27:23 2025 -0300
+
+    feat:persistencia de dados em mySql
+
+[33mcommit 381c7ee1c3da8e0b7a029cdc0855ec06e5c97e34[m
+Author: LucasnProg <lucasnprog@gmail.com>
+Date:   Thu Sep 11 21:40:38 2025 -0300
+
+    fix: correção da feature de login, sem persistência dos dados
+
+[33mcommit e9f458aa6fefa81fdc7a4b6d80be8e372f14f095[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Author: LucasnProg <lucasnprog@gmail.com>
+Date:   Thu Sep 11 21:25:26 2025 -0300
+
+    feat:desenvolvimento de funcionalidade de login
+
+[33mcommit c40218bb270dcaf52ffff0d9282de5e073eb1c52[m
+Author: LucasnProg <lucasnprog@gmail.com>
+Date:   Thu Sep 11 14:05:23 2025 -0300
+
+    fix: correções no Dockerfile
+
+[33mcommit 037c49ada85a7860b4bb1c1de3da817de8b938db[m
+Author: LucasnProg <lucasnprog@gmail.com>
+Date:   Wed Sep 10 14:38:21 2025 -0300
+
+    Commit inicial - estruturando projeto
