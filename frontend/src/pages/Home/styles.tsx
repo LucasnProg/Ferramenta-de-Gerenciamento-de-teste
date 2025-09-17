@@ -1,12 +1,13 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const Container = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  height: 100vh;
-  gap: 20px;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f0f2f5;
 `;
 
-export const Title = styled.h2``;
+export const ContentWrapper = styled.div`
+    flex-grow: 1;
+    width: 100%;
+`;
