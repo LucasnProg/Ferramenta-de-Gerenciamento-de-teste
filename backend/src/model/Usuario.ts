@@ -34,7 +34,20 @@ export class Usuario {
         this.password = Usuario.encryptPassword(password);
     }
 
-   
+    public setName(name: string): void {
+        if (!name || name.trim().length === 0) {
+            throw new Error("O nome não pode ser vazio.");
+        }
+        this.name = name;
+    }
+
+    public setEmail(email: string): void {
+        if (!Usuario.checkEmail(email)) {
+            throw new Error("Email inválido.");
+        }
+        this.email = email;
+    }
+
     static create(name: string, email: string, password: string, id?: string): Usuario {
         if (!name || !email || !password) throw new Error("Nome, email e senha são obrigatórios.");
         if (!Usuario.checkEmail(email)) throw new Error("Email inválido.");
@@ -69,7 +82,6 @@ export class Usuario {
         return encrypted === hashed;
     }
 
-    // Adicione no Usuario.ts
     static fromDatabase(name: string, email: string, encryptedPassword: string, id?: string): Usuario {
         return new Usuario(name, email, encryptedPassword, id);
     }

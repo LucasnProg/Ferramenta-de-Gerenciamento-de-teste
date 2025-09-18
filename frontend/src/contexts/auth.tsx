@@ -1,8 +1,8 @@
-// frontend/src/contexts/auth.tsx
 import { createContext, useEffect, useState, FC, ReactNode } from "react";
 
 // Tipagem do usuário
 export interface User {
+  id: string;
   name: string;
   email: string;
   senha?: string;
@@ -15,6 +15,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<string | void>;
   cadastro: (name: string, email: string, password: string) => Promise<string | void>;
   logout: () => void;
+  updateUser: (data: Partial<User>) => void;
 }
 
 interface AuthProviderProps {
@@ -29,10 +30,20 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const userToken = localStorage.getItem("user_token");
     if (userToken) {
-      const tokenData = JSON.parse(userToken);
-      setUser({ name: "", email: tokenData.email });
+      setUser(JSON.parse(userToken));
     }
   }, []);
+
+  const updateUser = (data: Partial<User>) => {
+    setUser(currentUser => {
+      if (!currentUser) {
+        return null;
+      }
+      const updatedUser = { ...currentUser, ...data } as User;
+      localStorage.setItem("user_token", JSON.stringify(updatedUser));
+      return updatedUser;
+    });
+  };
 
   // Login
   const login = async (email: string, password: string): Promise<string | void> => {
@@ -46,8 +57,8 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       const data = await res.json();
       if (!res.ok) return data.error;
 
-      setUser({ ...data.user });
-      localStorage.setItem("user_token", JSON.stringify({ email: data.user.email, token: data.token }));
+      setUser(data.user);
+      localStorage.setItem("user_token", JSON.stringify(data.user));
     } catch (err: any) {
       return "Erro ao conectar com o servidor";
     }
@@ -74,7 +85,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, signed: !!user, login, cadastro, logout }}>
+    <AuthContext.Provider value={{ user, signed: !!user, login, cadastro, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

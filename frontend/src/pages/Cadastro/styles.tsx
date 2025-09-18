@@ -34,7 +34,7 @@ export const LabelSignin = styled.label`
   color: #676767;
 `;
 
-export const labelError = styled.label`
+export const LabelError = styled.label`
   font-size: 14px;
   color: red;
 `;

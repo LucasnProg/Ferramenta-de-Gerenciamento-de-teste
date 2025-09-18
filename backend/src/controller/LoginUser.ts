@@ -1,4 +1,3 @@
-// backend/controller/LoginUser.ts
 import { Request, Response } from "express";
 import { UserRepoDb } from "../infra/repository/db/UserRepoDb";
 import { Usuario } from "../model/Usuario";
@@ -34,7 +33,7 @@ export class LoginUser {
 
       // Retorna usuário e token
       res.status(200).json({
-        user: { name: user.getName(), email: user.getEmail() },
+        user: { id: user.getId().getValue(), name: user.getName(), email: user.getEmail() },
         token: "token-fake"
       });
 

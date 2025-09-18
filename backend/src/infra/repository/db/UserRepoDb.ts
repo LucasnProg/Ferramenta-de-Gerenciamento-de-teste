@@ -41,5 +41,25 @@ export class UserRepoDb implements UserRepository {
         return Usuario.fromDatabase(user.name, user.email, user.password, user.id);
     }
 
+    async findById(id: string): Promise<Usuario | null> {
+        const user = await this.connection('usuarios').where({ id }).first();
+        if (!user) return null;
+
+        return Usuario.fromDatabase(user.name, user.email, user.password, user.id);
+    }
+
+    async update(user: Usuario): Promise<void> {
+        await this.connection('usuarios')
+            .where({ id: user.getId().getValue() })
+            .update({
+                name: user.getName(),
+                email: user.getEmail(),
+                password: user.getPassword(),
+            });
+    }
+
+    async delete(id: string): Promise<void> {
+        await this.connection('usuarios').where({ id }).del();
+    }
 
 }
