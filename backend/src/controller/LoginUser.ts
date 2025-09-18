@@ -1,7 +1,9 @@
-// backend/controller/LoginUser.ts
 import { Request, Response } from "express";
 import { UserRepoDb } from "../infra/repository/db/UserRepoDb";
 import { Usuario } from "../model/Usuario";
+import { LoginSecurityService } from "../services/LoginSecurityService";
+
+export const loginSecurityService = new LoginSecurityService();
 
 export class LoginUser {
   private repository: UserRepoDb;
@@ -20,6 +22,7 @@ export class LoginUser {
 
     try {
       const user = await this.repository.findByEmail(email);
+      loginSecurityService.checkAndRegisterAttempt(email);
 
       if (!user) {
         res.status(401).json({ error: "Usuário não encontrado" });
@@ -31,15 +34,18 @@ export class LoginUser {
         res.status(401).json({ error: "Senha inválida" });
         return;
       }
-
-      // Retorna usuário e token
+      loginSecurityService.resetAttempts(email);
       res.status(200).json({
         user: { name: user.getName(), email: user.getEmail() },
         token: "token-fake"
       });
 
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  }
+        if (err.message.includes("Muitas tentativas")) {
+            res.status(429).json({ error: err.message });
+        } else {
+            loginSecurityService.checkAndRegisterAttempt(email);
+            res.status(500).json({ error: "Erro interno no servidor." });
+        }
+  }   }
 }
