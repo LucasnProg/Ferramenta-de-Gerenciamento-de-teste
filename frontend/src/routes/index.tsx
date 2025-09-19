@@ -1,32 +1,30 @@
-import React, { Fragment, FC } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
-import Home from "../pages/Home";
-import Signin from "../pages/Login";
-import Signup from "../pages/Cadastro";
+import { FC } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-// Tipagem das props do Private
+import Home from "../pages/Home";
+import Login from "../pages/Login";
+import Cadastro from "../pages/Cadastro";
+import useAuth from "../hooks/useAuth";
+
 interface PrivateProps {
-  Item: FC;
+  Item: React.ComponentType;
 }
 
 const Private: FC<PrivateProps> = ({ Item }) => {
   const { signed } = useAuth();
-
-  return signed ? <Item /> : <Signin />;
+  return signed ? <Item /> : <Login />;
 };
+
 
 const RoutesApp: FC = () => {
   return (
     <BrowserRouter>
-      <Fragment>
-        <Routes>
-          <Route path="/home" element={<Private Item={Home} />} />
-          <Route path="/" element={<Signin />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="*" element={<Signin />} />
-        </Routes>
-      </Fragment>
+      <Routes>
+      <Route path="/home" element={<Private Item={Home} />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/Cadastro" element={<Cadastro />} />
+        <Route path="*" element={<Login />} />
+      </Routes>
     </BrowserRouter>
   );
 };

@@ -2,19 +2,19 @@ version: "3.8"
 
 services:
   db:
-    image: mysql:8.0
-    container_name: projeto_db
+    image: mysql:8.0.43
+    container_name: aplicacao_db
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: projeto_db
+      MYSQL_DATABASE: aplicacao_db
       MYSQL_USER: appuser
       MYSQL_PASSWORD: password
     ports:
       - "3306:3306"
     volumes:
-      - db_data:/var/lib/mysql
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -32,18 +32,19 @@ services:
       db:
         condition: service_healthy
     environment:
-      - NODE_ENV=production
-      - PORT=4000
-      - DATABASE_HOST=db
-      - DATABASE_PORT=3306
-      - DATABASE_USER=appuser
-      - DATABASE_PASSWORD=password
-      - DATABASE_NAME=projeto_db
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_HOST: db
+      DATABASE_PORT: 3306
+      DATABASE_USER: appuser
+      DATABASE_PASSWORD: password
+      DATABASE_NAME: aplicacao_db
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      ENCRYPTION_IV: ${ENCRYPTION_IV}
     ports:
       - "4000:4000"
     networks:
       - projeto_network
-
 
   frontend:
     build:
@@ -51,17 +52,18 @@ services:
       dockerfile: Dockerfile
     container_name: projeto_frontend
     depends_on:
-      - backend
+      backend:
+        condition: service_started
     environment:
-      - VITE_API_URL=http://backend:4000
+      VITE_API_URL: http://backend:4000
     ports:
       - "3000:80"
     networks:
       - projeto_network
 
-volumes:
-  db_data:
-
 networks:
   projeto_network:
     driver: bridge
+
+volumes:
+  mysql_data:

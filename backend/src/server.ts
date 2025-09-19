@@ -1,40 +1,34 @@
-import express from "express";
-import dotenv from "dotenv";
-import mysql from "mysql2/promise";
+import express, { json } from "express";
+import cors from "cors";
+import { router } from "./routes/router.js";
 
-dotenv.config();
+export class Server {
+  public app: express.Application;
+  private port: number;
 
-const app = express();
-app.use(express.json());
+  constructor() {
+    this.app = express();
+    this.port = parseInt(process.env.PORT || "4000");
 
-// Rota de health check
-app.get("/health", (_req, res) => {
-  res.json({ ok: true });
-});
+    // Middlewares
+    this.app.use(json());
 
-// Rota de exemplo que consulta o banco
-app.get("/api/hello", async (_req, res) => {
-  try {
-    const conn = await mysql.createConnection({
-      host: process.env.DATABASE_HOST,
-      port: Number(process.env.DATABASE_PORT || 3306),
-      user: process.env.DATABASE_USER,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE_NAME,
-    });
+    // CORS
+    this.app.use(cors({
+      origin: '*'  // Permite todas as origens (para dev)
+    }));
 
-    const [rows] = await conn.query("SELECT name, email FROM users LIMIT 5");
-    await conn.end();
-
-    return res.json({ message: "Olá do backend!", users: rows });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Erro ao acessar o banco" });
+    // Rotas
+    this.app.use(router);
   }
-});
 
-// Inicializa o servidor na porta definida
-const port = Number(process.env.PORT) || 4000;
-app.listen(port, "0.0.0.0", () => {
-  console.log(`Backend rodando na porta ${port}`);
-});
+  public start(): void {
+    this.app.listen(this.port, () => {
+      console.log(`Servidor rodando na porta ${this.port}`);
+    });
+  }
+
+  public getServer(): express.Application {
+    return this.app;
+  }
+}
