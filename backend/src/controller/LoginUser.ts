@@ -36,7 +36,7 @@ export class LoginUser {
       }
       loginSecurityService.resetAttempts(email);
       res.status(200).json({
-        user: { name: user.getName(), email: user.getEmail() },
+        user: { id: user.getId().getValue(), name: user.getName(), email: user.getEmail() },
         token: "token-fake"
       });
 

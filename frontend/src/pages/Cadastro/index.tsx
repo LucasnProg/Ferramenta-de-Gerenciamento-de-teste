@@ -1,89 +1,80 @@
-import React, { useState } from "react";
-import Input from "../../components/Input";
-import Button from "../../components/Button";
-import * as C from "./styles";
-import { Link, useNavigate } from "react-router-dom";
-import useAuth from "../../hooks/useAuth";
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import useAuth from '../../hooks/useAuth';
+import Button from '../../components/Button';
+import Input from '../../components/Input';
+import * as C from './styles';
 
-const Cadastro = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [senhaConf, setSenhaConf] = useState(""); // apenas confirmação de senha
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
+const Cadastro: React.FC = () => {
+    const { cadastro } = useAuth();
+    const navigate = useNavigate();
 
-  const { cadastro } = useAuth();
+    const [nome, setNome] = useState('');
+    const [email, setEmail] = useState('');
+    const [senha, setSenha] = useState('');
+    const [senhaConf, setSenhaConf] = useState('');
+    const [error, setError] = useState('');
 
-  const handleSignup = async (e: React.MouseEvent<HTMLButtonElement>) => {
-  e.preventDefault();
+    const handleSignup = async () => {
+        if (!nome || !email || !senha || !senhaConf) {
+            return setError("Preencha todos os campos");
+        }
+        if (senha !== senhaConf) {
+            return setError("As senhas não são iguais");
+        }
 
-  const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+        const result = await cadastro(nome, email, senha);
 
-  if (!name || !email || !senha || !senhaConf) {
-    setError("Preencha todos os campos, para efetuar o cadastro!");
-    return;
-  } else if (senha !== senhaConf) {
-    setError("As senhas não coincidem!");
-    return;
-  }
+        if (result) {
+            setError(result);
+            return;
+        }
 
-  if (!passwordRegex.test(senha)) {
-    setError("Senha inválida, insira uma senha com no mínimo 8 caracteres, letras maiúsculas e números!");
-    return;
-  }
+        alert("Usuário cadastrado com sucesso!");
+        navigate("/");
+    };
 
-  const res = await cadastro(name, email, senha);
-
-  if (res) {
-    setError(res);
-    return;
-  }
-
-  alert("Usuário cadastrado com sucesso!");
-  navigate("/");
-};
-
-
-  return (
-    <C.Container>
-      <C.Label>Cadastrar-se</C.Label>
-      <C.Content>
-        <Input
-          type="text"
-          placeholder="Digite seu Nome"
-          value={name}
-          onChange={(e) => { setName(e.target.value); setError(""); }}
-        />
-        <Input
-          type="email"
-          placeholder="Digite seu E-mail"
-          value={email}
-          onChange={(e) => { setEmail(e.target.value); setError(""); }}
-        />
-        <Input
-          type="password"
-          placeholder="Digite sua Senha"
-          value={senha}
-          onChange={(e) => { setSenha(e.target.value); setError(""); }}
-        />
-        <Input
-          type="password"
-          placeholder="Confirme sua Senha"
-          value={senhaConf}
-          onChange={(e) => { setSenhaConf(e.target.value); setError(""); }}
-        />
-        <C.labelError>{error}</C.labelError>
-        <Button Text="Inscrever-se" onClick={handleSignup} Type="button" />
-        <C.LabelSignin>
-          Já tem uma conta?
-          <C.Strong>
-            <Link to="/">&nbsp;Entre</Link>
-          </C.Strong>
-        </C.LabelSignin>
-      </C.Content>
-    </C.Container>
-  );
+    return (
+        <C.Container>
+            <C.Label>Cadastrar-se</C.Label>
+            <C.Content>
+                <Input
+                    type="text"
+                    placeholder="Digite seu Nome"
+                    value={nome}
+                    onChange={(e) => [setNome(e.target.value), setError('')]}
+                />
+                <Input
+                    type="email"
+                    placeholder="Digite seu E-mail"
+                    value={email}
+                    onChange={(e) => [setEmail(e.target.value), setError('')]}
+                />
+                <Input
+                    type="password"
+                    placeholder="Digite sua Senha"
+                    value={senha}
+                    onChange={(e) => [setSenha(e.target.value), setError('')]}
+                />
+                <Input
+                    type="password"
+                    placeholder="Confirme sua Senha"
+                    value={senhaConf}
+                    onChange={(e) => [setSenhaConf(e.target.value), setError('')]}
+                />
+                <C.LabelError>{error}</C.LabelError>
+                <Button type="submit" onClick={handleSignup}>
+                    Cadastrar
+                </Button>
+                <C.LabelSignin>
+                    Já tem uma conta?
+                    <C.Strong>
+                        <Link to="/">&nbsp;Entre</Link>
+                    </C.Strong>
+                </C.LabelSignin>
+            </C.Content>
+        </C.Container>
+    );
 };
 
 export default Cadastro;

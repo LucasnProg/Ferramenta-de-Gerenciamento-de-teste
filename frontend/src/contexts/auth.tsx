@@ -1,54 +1,55 @@
-// frontend/contexts/auth.tsx
 import { createContext, useEffect, useState, FC, ReactNode } from "react";
-import axios from "axios";
 
 // Tipagem do usuário
 export interface User {
+  id: string;
   name: string;
   email: string;
-  senha: string;
+  senha?: string;
 }
 
-// Tipagem da resposta do backend
-interface AuthResponse {
-  user: User;
-  token: string;
-}
-
-// Tipagem do contexto de autenticação
+// Contexto de autenticação
 interface AuthContextType {
   user: User | null;
   signed: boolean;
-  login: (email: string, senha: string) => Promise<string | void>;
-  cadastro: (name: string, email: string, senha: string) => Promise<string | void>;
+  login: (email: string, password: string) => Promise<string | void>;
+  cadastro: (name: string, email: string, password: string) => Promise<string | void>;
   logout: () => void;
+  updateUser: (data: Partial<User>) => void;
 }
 
-// Tipagem das props do provider
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Criação do contexto
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-// Provider com estado e funções
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  // Carrega token ao iniciar
   useEffect(() => {
     const userToken = localStorage.getItem("user_token");
     if (userToken) {
-      const tokenData: { email: string; token: string } = JSON.parse(userToken);
-      setUser({ name: "", email: tokenData.email, senha: "" });
+      setUser(JSON.parse(userToken));
     }
   }, []);
 
-  // Função de login
-  async function login(email: string, password: string): Promise<string | void> {
+  const updateUser = (data: Partial<User>) => {
+    setUser(currentUser => {
+      if (!currentUser) {
+        return null;
+      }
+      const updatedUser = { ...currentUser, ...data } as User;
+      localStorage.setItem("user_token", JSON.stringify(updatedUser));
+      return updatedUser;
+    });
+  };
+
+  // Login
+  const login = async (email: string, password: string): Promise<string | void> => {
     try {
-      const res = await fetch(`http://localhost:4000/login`, {
+
+      const res = await fetch("http://localhost:4000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -57,35 +58,35 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       const data = await res.json();
       if (!res.ok) return data.error;
 
-      setUser(data);
-      return;
+      setUser(data.user);
+      localStorage.setItem("user_token", JSON.stringify(data.user));
     } catch (err: any) {
-      return err.message;
+      return "Erro ao conectar com o servidor";
     }
-  }
-
-
-  // Função de cadastro
-  const cadastro = async (name: string, email: string, password: string) => {
-    const response = await fetch("http://localhost:4000/usuario", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) return data.error;
   };
 
+  // Cadastro
+  const cadastro = async (name: string, email: string, password: string) => {
+    try {
+      const res = await fetch("http://localhost:4000/usuario", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) return data.error;
+    } catch (err: any) {
+      return "Erro ao conectar com o servidor";
+    }
+  };
 
-  // Função de logout
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user_token");
   };
 
   return (
-    <AuthContext.Provider value={{ user, signed: !!user, login, cadastro, logout }}>
+    <AuthContext.Provider value={{ user, signed: !!user, login, cadastro, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

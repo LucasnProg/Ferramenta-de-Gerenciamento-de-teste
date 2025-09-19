@@ -1,32 +1,36 @@
 import { FC } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Cadastro from "../pages/Cadastro";
 import useAuth from "../hooks/useAuth";
+import HomeContent from '../pages/Home/HomeContent';
+import EditUser from '../pages/EditUser';
+import DeleteUser from '../pages/DeleteUser';
 
-interface PrivateProps {
-  Item: React.ComponentType;
-}
-
-const Private: FC<PrivateProps> = ({ Item }) => {
-  const { signed } = useAuth();
-  return signed ? <Item /> : <Login />;
+const Private: FC<{ children: React.ReactElement }> = ({ children }) => {
+    const { signed } = useAuth();
+    return signed ? children : <Navigate to="/" />;
 };
 
-
 const RoutesApp: FC = () => {
-  return (
-    <BrowserRouter>
-      <Routes>
-      <Route path="/home" element={<Private Item={Home} />} />
-        <Route path="/" element={<Login />} />
-        <Route path="/Cadastro" element={<Cadastro />} />
-        <Route path="*" element={<Login />} />
-      </Routes>
-    </BrowserRouter>
-  );
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Login />} />
+                <Route path="/Cadastro" element={<Cadastro />} />
+
+                <Route path="/home" element={<Private><Home /></Private>}>
+                    <Route index element={<HomeContent />} />
+                    <Route path="edit-user" element={<EditUser />} />
+                    <Route path="delete-user" element={<DeleteUser />} />
+                </Route>
+
+                <Route path="*" element={<Login />} />
+            </Routes>
+        </BrowserRouter>
+    );
 };
 
 export default RoutesApp;

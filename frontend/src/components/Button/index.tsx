@@ -1,19 +1,19 @@
-import React from "react";
-import * as C from "./styles";
+import React from 'react';
+import * as C from './styles';
 
-interface ButtonProps {
-  Text: string;
-  onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<void>;
-  Type?: "button" | "submit" | "reset";
-  children?: React.ReactNode;
-}
+type Props = {
+    children: React.ReactNode;
+    onClick?: () => void;
+    type?: "button" | "submit" | "reset";
+    style?: React.CSSProperties;
+};
 
-  const Button: React.FC<ButtonProps> = ({ Text, onClick, Type, children }) => {
+const Button: React.FC<Props> = ({ children, onClick, type = "button", style }) => {
     return (
-      <C.Button type={Type} onClick={onClick}>
-        {Text || children}
-      </C.Button>
+        <C.Button type={type} onClick={onClick} style={style}>
+            {children}
+        </C.Button>
     );
-  };
-  
-  export default Button;
+};
+
+export default Button;

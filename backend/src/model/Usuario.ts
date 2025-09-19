@@ -30,11 +30,27 @@ export class Usuario {
         return this.password; 
     }
 
-    public setPassword(password: string): void {
+   public setPassword(password: string): void {
+        if (!Usuario.checkPassword(password)) {
+            throw new Error("Senha inválida. Deve ter pelo menos 8 caracteres, uma letra maiúscula, uma minúscula e um número.");
+        }
         this.password = Usuario.encryptPassword(password);
     }
 
-   
+    public setName(name: string): void {
+        if (!name || name.trim().length === 0) {
+            throw new Error("O nome não pode ser vazio.");
+        }
+        this.name = name;
+    }
+
+    public setEmail(email: string): void {
+        if (!Usuario.checkEmail(email)) {
+            throw new Error("Email inválido.");
+        }
+        this.email = email;
+    }
+
     static create(name: string, email: string, password: string, id?: string): Usuario {
         if (!name || !email || !password) throw new Error("Nome, email e senha são obrigatórios.");
         if (!Usuario.checkEmail(email)) throw new Error("Email inválido.");
@@ -46,7 +62,8 @@ export class Usuario {
 
     // Regex básico para senha forte
     static checkPassword(value: string): boolean {
-        const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+        // Exige: 1 minúscula, 1 maiúscula, 1 número, e no mínimo 8 caracteres
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
         return passwordRegex.test(value);
     }
 
@@ -69,7 +86,6 @@ export class Usuario {
         return encrypted === hashed;
     }
 
-    // Adicione no Usuario.ts
     static fromDatabase(name: string, email: string, encryptedPassword: string, id?: string): Usuario {
         return new Usuario(name, email, encryptedPassword, id);
     }

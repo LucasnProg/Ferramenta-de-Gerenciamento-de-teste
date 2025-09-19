@@ -7,6 +7,7 @@ interface AuthContextType {
   login: (email: string, senha: string) => Promise<string | void>;
   cadastro: (name: string, email: string, senha: string) => Promise<string | void>;
   logout: () => void;
+  updateUser: (data: Partial<User>) => void;
 }
 
 const useAuth = (): AuthContextType => {

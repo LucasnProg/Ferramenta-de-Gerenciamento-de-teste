@@ -1,18 +1,16 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import Button from "../../components/Button";
-import useAuth from "../../hooks/useAuth";
-import * as C from "./styles";
+import React from 'react';
+import Sidebar from './Sidebar';
+import { Container, ContentWrapper } from './styles';
+import { Outlet } from 'react-router-dom';
 
-const Home = () => {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
-
+const Home: React.FC = () => {
   return (
-    <C.Container>
-      <C.Title>Home</C.Title>
-      
-    </C.Container>
+    <Container>
+      <Sidebar />
+      <ContentWrapper>
+        <Outlet />
+      </ContentWrapper>
+    </Container>
   );
 };
 
