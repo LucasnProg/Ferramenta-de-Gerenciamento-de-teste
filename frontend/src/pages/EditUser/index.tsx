@@ -32,13 +32,14 @@ const Message = styled.p<{ error?: boolean }>`
     margin-top: 1rem;
 `;
 
+
 const EditUser: React.FC = () => {
     const { user, updateUser } = useAuth();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-
+    
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
@@ -54,8 +55,16 @@ const EditUser: React.FC = () => {
         setError('');
         setSuccess('');
 
-        if (password && password !== confirmPassword) {
-            return setError("As senhas não coincidem.");
+        if (password) { 
+            if (password !== confirmPassword) {
+                return setError("As senhas não coincidem.");
+            }
+
+            // Regex para validar a força da senha (o mesmo do backend)
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+            if (!passwordRegex.test(password)) {
+                return setError("A senha deve ter no mínimo 8 caracteres, com ao menos uma letra maiúscula, uma minúscula e um número.");
+            }
         }
 
         const payload: { name?: string; email?: string; senha?: string } = {};
@@ -66,6 +75,18 @@ const EditUser: React.FC = () => {
 
         if (Object.keys(payload).length === 0) {
             return setError("Nenhuma alteração para salvar.");
+        }
+
+        const fieldMappings: { [key: string]: string } = {
+            name: "Nome",
+            email: "E-mail",
+            senha: "Senha"
+        };
+        const changedFields = Object.keys(payload).map(key => fieldMappings[key]);
+        const confirmationMessage = `Você está prestes a alterar os seguintes campos:\n\n- ${changedFields.join('\n- ')}\n\nDeseja continuar?`;
+        const isConfirmed = window.confirm(confirmationMessage);
+        if (!isConfirmed) {
+            return;
         }
 
         try {
@@ -80,9 +101,8 @@ const EditUser: React.FC = () => {
             if (!response.ok) {
                 throw new Error(data.error || 'Falha ao atualizar usuário.');
             }
-
+            
             updateUser(payload);
-
             setSuccess("Usuário atualizado com sucesso!");
             setPassword('');
             setConfirmPassword('');

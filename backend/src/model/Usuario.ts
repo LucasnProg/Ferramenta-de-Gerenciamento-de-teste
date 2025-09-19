@@ -30,7 +30,10 @@ export class Usuario {
         return this.password; 
     }
 
-    public setPassword(password: string): void {
+   public setPassword(password: string): void {
+        if (!Usuario.checkPassword(password)) {
+            throw new Error("Senha inválida. Deve ter pelo menos 8 caracteres, uma letra maiúscula, uma minúscula e um número.");
+        }
         this.password = Usuario.encryptPassword(password);
     }
 
@@ -59,7 +62,8 @@ export class Usuario {
 
     // Regex básico para senha forte
     static checkPassword(value: string): boolean {
-        const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+        // Exige: 1 minúscula, 1 maiúscula, 1 número, e no mínimo 8 caracteres
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
         return passwordRegex.test(value);
     }
 
