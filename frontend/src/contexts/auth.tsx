@@ -48,7 +48,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   // Função de login
   async function login(email: string, password: string): Promise<string | void> {
     try {
-      const res = await fetch(`http://localhost:4000/usuario/login`, {
+      const res = await fetch(`http://localhost:4000/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
