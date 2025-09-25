@@ -18,7 +18,7 @@ const Sidebar: React.FC = () => {
     <Container>
         <LogoContainer>
             <Logo src={SiriguelaLogo} alt="Logo Siriguela com Bigode" />
-            <Title>Gerenciador</Title>
+            <Title>CIRIG</Title>
         </LogoContainer>
 
         <NavItem to="/home/edit-user">Editar Usuário</NavItem>
