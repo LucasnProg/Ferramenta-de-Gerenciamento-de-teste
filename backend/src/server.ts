@@ -15,7 +15,7 @@ export class Server {
 
     // CORS
     this.app.use(cors({
-      origin: '*'  // Permite todas as origens (para dev)
+      origin: '*'  
     }));
 
     // Rotas
