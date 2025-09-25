@@ -9,18 +9,16 @@ export class ProjectRepoDb {
     this.connection = db;
   }
 
-  async save(project: Projeto, userId: string): Promise<string> {
+  async save(project: Projeto, userId: string): Promise<number> {
     const trx = await this.connection.transaction();
 
     try {
-      const [insertedProject] = await trx('projetos')
-        .insert({
-          titulo: project.getTitulo(),
-          descricao: project.getDescricao()
-        })
-        .returning('id');
-
-      const projetoId = typeof insertedProject === 'object' ? insertedProject.id : insertedProject;
+      const [insertedId] = await trx('projetos').insert({
+        titulo: project.getTitulo(),
+        descricao: project.getDescricao()
+      });
+      
+      const projetoId = insertedId;
 
       await trx('usuarios_projeto').insert({
         id_projeto: projetoId,
@@ -30,21 +28,34 @@ export class ProjectRepoDb {
 
       await trx.commit();
       return projetoId;
+
     } catch (err) {
       await trx.rollback();
+      console.error("ERRO NO BANCO AO SALVAR PROJETO:", err);
       throw err;
     }
   }
 
+
   async getAll(): Promise<Projeto[]> {
-    const projectsData = await this.connection('projetos').select('*');
-    return projectsData.map((p: any) => new Projeto(p.titulo, p.descricao, p.id_gerente));
+    const projectsData = await this.connection('projetos as p')
+      .join('usuarios_projeto as up', 'p.id', 'up.id_projeto')
+      .where('up.papel_usuario', 'gerente')
+      .select('p.titulo', 'p.descricao', 'up.id_usuario');
+
+    return projectsData.map((p: any) => new Projeto(p.titulo, p.descricao, p.id_usuario));
   }
 
   async findById(id: number): Promise<Projeto | null> {
-    const project = await this.connection('projetos').where({ id }).first();
+    const project = await this.connection('projetos as p')
+      .join('usuarios_projeto as up', 'p.id', 'up.id_projeto')
+      .where({ 'p.id': id, 'up.papel_usuario': 'gerente' })
+      .select('p.titulo', 'p.descricao', 'up.id_usuario')
+      .first();
+
     if (!project) return null;
-    return new Projeto(project.titulo, project.descricao, project.id_gerente);
+
+    return new Projeto(project.titulo, project.descricao, project.id_usuario);
   }
 
   async update(id: number, project: Projeto): Promise<void> {

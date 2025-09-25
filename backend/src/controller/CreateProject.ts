@@ -7,17 +7,26 @@ export class CreateProject {
 
   async execute(req: Request, res: Response) {
     const { titulo, descricao } = req.body;
-    //const user = req.user;
+    const user = req.user; // Obtém o usuário do middleware de autenticação
 
-    if (!titulo) return res.status(400).json({ error: "Título é obrigatório" });
-    //if (!user) return res.status(401).json({ error: "Usuário não autenticado" });
+    if (!titulo) {
+      return res.status(400).json({ error: "Título é obrigatório" });
+    }
+    if (!user) {
+      return res.status(401).json({ error: "Usuário não autenticado" });
+    }
 
     try {
-      //const projeto = new Projeto(titulo, descricao, user.getId().getValue());
-      //const projetoId = await this.repository.save(projeto, user.getId().getValue());
-      //res.status(201).json({ message: "Projeto criado com sucesso!", projetoId });
+      const creatorId = user.getId().getValue();
+      const projeto = new Projeto(titulo, descricao, creatorId);
+
+      const projetoId = await this.repository.save(projeto, creatorId);
+      
+      res.status(201).json({ message: "Projeto criado com sucesso!", projetoId });
+
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      console.error("FALHA AO CRIAR PROJETO:", err);
+      res.status(500).json({ error: "Erro interno ao salvar o projeto." });
     }
   }
 }

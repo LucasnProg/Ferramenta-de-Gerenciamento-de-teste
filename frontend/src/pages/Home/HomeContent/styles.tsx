@@ -2,7 +2,6 @@ import styled, { keyframes } from 'styled-components';
 import React, { useState } from "react";
 import useAuth from '../../../hooks/useAuth';
 
-// --- ESTILOS GERAIS (sem alterações) ---
 export const ContainerTitle = styled.main`
   flex-grow: 1;
   padding: 40px;
@@ -29,8 +28,8 @@ export const ContainerContent = styled.main`
   padding: 40px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  align-items: center; /* Alinhamento alterado para o topo */
+  justify-content: flex-start; /* Alinhamento alterado para o topo */
   max-width: 1200px;   
   width: 90%;          
   margin: 0 auto;     
@@ -63,7 +62,38 @@ export const ProjectCreateBox: React.FC<{ onClick: () => void }> = ({ onClick })
 };
 
 
-// --- ESTILOS DO MODAL E FORMULÁRIO (com as novas adições) ---
+export const ProjectListContainer = styled.div`
+  width: 100%;
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+`;
+
+export const ProjectItem = styled.div`
+  background-color: #f0e9e9ff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(43, 121, 56, 0.8);
+  height: 100px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  h3 {
+    font-size: 1.2rem;
+    color: #333;
+    width: 100%;
+    text-align: right;
+  }
+
+  &:hover {
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 8px 16px rgba(44, 170, 65, 0.8);
+  }
+`;
+
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -134,7 +164,6 @@ const AnimatedFileInput = styled(Input)`
   animation: ${fadeIn} 0.3s ease-in-out;
 `;
 
-// Estilo base do botão
 const Button = styled.button`
   padding: 12px 20px;
   background: #007bff;
@@ -156,7 +185,6 @@ const Button = styled.button`
   }
 `;
 
-// NOVO: Estilo para o botão de cancelar
 const CancelButton = styled(Button)`
   background-color: #6c757d;
   &:hover {
@@ -164,7 +192,6 @@ const CancelButton = styled(Button)`
   }
 `;
 
-// NOVO: Container para alinhar os botões
 const ButtonContainer = styled.div`
   display: flex;
   gap: 10px;
@@ -172,7 +199,6 @@ const ButtonContainer = styled.div`
   margin-top: 1rem;
 `;
 
-// NOVOS: Estilos para as mensagens de feedback
 const SuccessMessage = styled.p`
   color: #28a745;
   font-weight: bold;
@@ -185,10 +211,12 @@ const ErrorMessage = styled.p`
   text-align: center;
 `;
 
+interface CreateProjectModalProps {
+  onClose: () => void;
+  onProjectCreated: () => void; 
+}
 
-// --- COMPONENTE DO MODAL (versão corrigida) ---
-
-export const CreateProjectModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose, onProjectCreated }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [jiraFile, setJiraFile] = useState<File | null>(null);
@@ -248,6 +276,8 @@ export const CreateProjectModal: React.FC<{ onClose: () => void }> = ({ onClose 
         }
 
         setSuccess("Projeto criado com sucesso!");
+        onProjectCreated(); 
+        
         setTimeout(() => {
           onClose(); 
         }, 2000);
