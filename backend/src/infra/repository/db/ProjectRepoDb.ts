@@ -59,4 +59,12 @@ export class ProjectRepoDb {
   async delete(id: number): Promise<void> {
     await this.connection('projetos').where({ id }).del();
   }
+
+  async findByUserId(userId: string): Promise<Projeto[]> {
+    const projectsData = await this.connection('projetos as p')
+      .join('usuarios_projeto as up', 'p.id', 'up.id_projeto')
+      .where('up.id_usuario', userId)
+      .select('p.id', 'p.titulo', 'p.descricao');
+    return projectsData.map((p: any) => new Projeto(p.titulo, p.descricao, userId));
+  }
 }

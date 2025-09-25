@@ -1,6 +1,8 @@
 import styled, { keyframes } from 'styled-components';
 import React, { useState } from "react";
+import useAuth from '../../../hooks/useAuth';
 
+// --- ESTILOS GERAIS (sem alterações) ---
 export const ContainerTitle = styled.main`
   flex-grow: 1;
   padding: 40px;
@@ -21,7 +23,6 @@ export const WelcomeText = styled.p`
   color: #676767;
   text-align: center;
 `;
-
 
 export const ContainerContent = styled.main`
   flex-grow: 1;
@@ -61,6 +62,8 @@ export const ProjectCreateBox: React.FC<{ onClick: () => void }> = ({ onClick })
   return <NewProjectButton onClick={onClick}>+ Novo Projeto</NewProjectButton>;
 };
 
+
+// --- ESTILOS DO MODAL E FORMULÁRIO (com as novas adições) ---
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -122,7 +125,6 @@ const CheckboxContainer = styled.label`
   margin-bottom: 15px;
 `;
 
-// Animação para aparecer suavemente o input de arquivo
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -132,6 +134,7 @@ const AnimatedFileInput = styled(Input)`
   animation: ${fadeIn} 0.3s ease-in-out;
 `;
 
+// Estilo base do botão
 const Button = styled.button`
   padding: 12px 20px;
   background: #007bff;
@@ -141,43 +144,119 @@ const Button = styled.button`
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
+  width: 100%;
 
   &:hover {
     background: #0056b3;
   }
+
+  &:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
 `;
+
+// NOVO: Estilo para o botão de cancelar
+const CancelButton = styled(Button)`
+  background-color: #6c757d;
+  &:hover {
+    background-color: #5a6268;
+  }
+`;
+
+// NOVO: Container para alinhar os botões
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 1rem;
+`;
+
+// NOVOS: Estilos para as mensagens de feedback
+const SuccessMessage = styled.p`
+  color: #28a745;
+  font-weight: bold;
+  text-align: center;
+`;
+
+const ErrorMessage = styled.p`
+  color: #d9534f;
+  font-weight: bold;
+  text-align: center;
+`;
+
+
+// --- COMPONENTE DO MODAL (versão corrigida) ---
 
 export const CreateProjectModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [jiraFile, setJiraFile] = useState<File | null>(null);
   const [importJira, setImportJira] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
-    // Validação: se marcar importar JIRA, o arquivo é obrigatório
+    setError("");
+    setSuccess("");
+    setIsSubmitting(true);
+
+    if (!title) {
+      setError("O título é obrigatório.");
+      setIsSubmitting(false);
+      return;
+    }
+    
     if (importJira && !jiraFile) {
-      alert("Para importar dados do JIRA, você deve enviar um arquivo XML.");
+      setError("Para importar dados do JIRA, você deve enviar um arquivo XML.");
+      setIsSubmitting(false);
       return;
     }
-
-    // Validação exclusiva para .xml
     if (jiraFile && !jiraFile.name.endsWith(".xml")) {
-      alert("O arquivo deve ter extensão .xml.");
+      setError("O arquivo deve ter extensão .xml.");
+      setIsSubmitting(false);
       return;
     }
 
-    const projectData = {
-      title,
-      description,
-      jiraFile: importJira ? jiraFile : null,
-      importJira
-    };
+    try {
+        const userToken = localStorage.getItem('user_token');
+        if (!userToken) {
+            throw new Error("Usuário não autenticado.");
+        }
+        
+        const loggedUser = JSON.parse(userToken);
 
-    console.log("Criando projeto:", projectData);
-    // Futuramente aqui você faria a chamada ao backend
-    onClose();
+        const response = await fetch("http://localhost:4000/projeto", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "user-id": loggedUser.id 
+            },
+            body: JSON.stringify({
+                titulo: title,
+                descricao: description,
+            }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || "Ocorreu um erro ao criar o projeto.");
+        }
+
+        setSuccess("Projeto criado com sucesso!");
+        setTimeout(() => {
+          onClose(); 
+        }, 2000);
+
+    } catch (err: any) {
+        console.error("Erro ao criar projeto:", err);
+        setError(err.message);
+        setIsSubmitting(false);
+    }
   };
 
   return (
@@ -192,14 +271,13 @@ export const CreateProjectModal: React.FC<{ onClose: () => void }> = ({ onClose 
             onChange={(e) => setTitle(e.target.value)}
             required
           />
-
           <TextArea
             placeholder="Descrição (opcional)"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
           />
-
+          
           <CheckboxContainer>
             <input 
               type="checkbox"
@@ -219,7 +297,17 @@ export const CreateProjectModal: React.FC<{ onClose: () => void }> = ({ onClose 
             />
           )}
 
-          <Button type="submit">Criar Projeto</Button>
+          {error && <ErrorMessage>{error}</ErrorMessage>}
+          {success && <SuccessMessage>{success}</SuccessMessage>}
+          
+          <ButtonContainer>
+            <CancelButton type="button" onClick={onClose} disabled={isSubmitting}>
+                Cancelar
+            </CancelButton>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Criando...' : 'Criar Projeto'}
+            </Button>
+          </ButtonContainer>
         </form>
       </ModalContent>
     </ModalOverlay>

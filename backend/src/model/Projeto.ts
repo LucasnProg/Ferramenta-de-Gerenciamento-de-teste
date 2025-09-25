@@ -1,11 +1,9 @@
-import { Uuid } from "./Uuid";
-
 export class Projeto {
   private titulo: string;
   private descricao?: string;
-  private participantes: Map<Uuid, string> = new Map();
+  private participantes: Map<string, string> = new Map();
 
-  constructor(titulo: string, descricao: string | undefined, creatorId: Uuid) {
+  constructor(titulo: string, descricao: string | undefined, creatorId: string) {
     this.titulo = titulo;
     this.descricao = descricao;
     this.participantes.set(creatorId, "Gerente");

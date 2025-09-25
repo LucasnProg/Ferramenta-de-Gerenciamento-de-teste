@@ -9,6 +9,9 @@ import { EditUser } from "../controller/EditUser";
 import { DeleteUser } from "../controller/DeleteUser";
 import { ProjectRepoDb } from "../infra/repository/db/ProjectRepoDb";
 import { CreateProject } from "../controller/CreateProject";
+import { authMiddleware } from "../middleware/authMiddleware";
+import { ListProjectsByUser } from "../controller/ListProjectsByUser"; 
+
 
 const router = Router();
 
@@ -21,6 +24,7 @@ const editUser = new EditUser(repository);
 const deleteUser = new DeleteUser(repository);
 const projectRepo = new ProjectRepoDb();
 const createProject = new CreateProject(projectRepo);
+const listProjectsByUser = new ListProjectsByUser(projectRepo);
 
 // Listar usuários
 router.get("/usuario", (req: Request, res: Response) => {
@@ -67,7 +71,9 @@ router.delete("/usuario/:id", (req: Request, res: Response) => {
 });
 
 
-router.post("/projeto", (req: Request, res: Response) => createProject.execute(req, res));
+router.post("/projeto", authMiddleware, (req: Request, res: Response) => createProject.execute(req, res));
+
+router.get("/projetos", authMiddleware, (req, res) => listProjectsByUser.execute(req, res));
 
 
 export { router };
