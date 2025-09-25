@@ -7,6 +7,8 @@ import { LoginUser } from "../controller/LoginUser";
 import { MetricsService } from "../services/MetricsService"; 
 import { EditUser } from "../controller/EditUser";
 import { DeleteUser } from "../controller/DeleteUser";
+import { ProjectRepoDb } from "../infra/repository/db/ProjectRepoDb";
+import { CreateProject } from "../controller/CreateProject";
 
 const router = Router();
 
@@ -17,6 +19,8 @@ const usersList = new UsersList(repository);
 const loginUser = new LoginUser(repository);
 const editUser = new EditUser(repository);
 const deleteUser = new DeleteUser(repository);
+const projectRepo = new ProjectRepoDb();
+const createProject = new CreateProject(projectRepo);
 
 // Listar usuários
 router.get("/usuario", (req: Request, res: Response) => {
@@ -61,5 +65,9 @@ router.put("/usuario/:id", (req: Request, res: Response) => {
 router.delete("/usuario/:id", (req: Request, res: Response) => {
     deleteUser.execute(req, res);
 });
+
+
+router.post("/projeto", (req: Request, res: Response) => createProject.execute(req, res));
+
 
 export { router };

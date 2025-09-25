@@ -1,11 +1,13 @@
-import React, { useContext } from 'react';
-import { ContainerTitle, WelcomeTitle, WelcomeText, ProjectCreateBox, ContainerContent } from './styles';
+import React, { useContext, useState } from 'react';
+import { ContainerTitle, WelcomeTitle, WelcomeText, ProjectCreateBox, ContainerContent, CreateProjectModal } from './styles';
 import  useAuth from '../../../hooks/useAuth';
 
 
 
 const HomeContent: React.FC = () => {
   const { user } = useAuth();
+  const [showModal, setShowModal] = useState(false);
+
   return (
     <>
       <ContainerTitle>
@@ -18,8 +20,10 @@ const HomeContent: React.FC = () => {
       </ContainerTitle>
 
       <ContainerContent>
-        <ProjectCreateBox onClick={() => console.log("Criar novo projeto")} />
+        <ProjectCreateBox onClick={() => setShowModal(true)} />
       </ContainerContent>
+
+      {showModal && <CreateProjectModal onClose={() => setShowModal(false)} />}
     </>
   );
 };

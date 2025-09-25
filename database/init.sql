@@ -25,9 +25,10 @@ CREATE TABLE IF NOT EXISTS projetos (
 
 
 CREATE TABLE IF NOT EXISTS usuarios_projeto (
-    id_projeto INTEGER ,
-    id_usuario VARCHAR(36) ,
-    PRIMARY KEY (id_projeto, id_usuario),
+    id_projeto INTEGER,
+    id_usuario VARCHAR(36),
+    papel_usuario VARCHAR(50),
+    PRIMARY KEY (id_projeto, id_usuario, papel_usuario),
     CONSTRAINT projeto_fk FOREIGN KEY (id_projeto) REFERENCES projetos(id) ON DELETE CASCADE ON UPDATE CASCADE, 
     CONSTRAINT usuario_fk FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE ON UPDATE CASCADE
 )
