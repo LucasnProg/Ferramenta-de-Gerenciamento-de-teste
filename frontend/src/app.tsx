@@ -4,7 +4,6 @@ import RoutesApp from "./routes";
 import { AuthProvider } from "./contexts/auth";
 
 const App = () => {
-  localStorage.clear();
   return (
     <AuthProvider>
       <RoutesApp />

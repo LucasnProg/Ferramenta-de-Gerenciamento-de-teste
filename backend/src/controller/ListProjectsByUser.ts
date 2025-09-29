@@ -1,4 +1,3 @@
-
 import { Request, Response } from "express";
 import { ProjectRepoDb } from "../infra/repository/db/ProjectRepoDb";
 
@@ -18,6 +17,7 @@ export class ListProjectsByUser {
       
       // Mapeia para um formato mais simples para o frontend
       const projetosSimples = projetos.map(p => ({
+        id: p.getId(),
         titulo: p.getTitulo(),
         descricao: p.getDescricao()
       }));

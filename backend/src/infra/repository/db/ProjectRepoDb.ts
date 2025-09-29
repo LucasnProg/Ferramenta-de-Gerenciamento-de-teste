@@ -41,7 +41,7 @@ export class ProjectRepoDb {
     const projectsData = await this.connection('projetos as p')
       .join('usuarios_projeto as up', 'p.id', 'up.id_projeto')
       .where('up.papel_usuario', 'gerente')
-      .select('p.titulo', 'p.descricao', 'up.id_usuario');
+      .select('p.id', 'p.titulo', 'p.descricao', 'up.id_usuario');
 
     return projectsData.map((p: any) => new Projeto(p.titulo, p.descricao, p.id_usuario));
   }
@@ -49,13 +49,13 @@ export class ProjectRepoDb {
   async findById(id: number): Promise<Projeto | null> {
     const project = await this.connection('projetos as p')
       .join('usuarios_projeto as up', 'p.id', 'up.id_projeto')
-      .where({ 'p.id': id, 'up.papel_usuario': 'gerente' })
-      .select('p.titulo', 'p.descricao', 'up.id_usuario')
+      .where({ 'p.id': id })
+      .select('p.id', 'p.titulo', 'p.descricao', 'up.id_usuario')
       .first();
 
     if (!project) return null;
 
-    return new Projeto(project.titulo, project.descricao, project.id_usuario);
+    return new Projeto(project.titulo, project.descricao, project.id_usuario, project.id);
   }
 
   async update(id: number, project: Projeto): Promise<void> {
@@ -76,6 +76,7 @@ export class ProjectRepoDb {
       .join('usuarios_projeto as up', 'p.id', 'up.id_projeto')
       .where('up.id_usuario', userId)
       .select('p.id', 'p.titulo', 'p.descricao');
-    return projectsData.map((p: any) => new Projeto(p.titulo, p.descricao, userId));
-  }
+
+    return projectsData.map((p: any) => new Projeto(p.titulo, p.descricao, userId, p.id));
+  } 
 }
