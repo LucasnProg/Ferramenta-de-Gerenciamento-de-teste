@@ -41,6 +41,10 @@ export class Usuario {
         if (!name || name.trim().length === 0) {
             throw new Error("O nome não pode ser vazio.");
         }
+
+        if (!Usuario.checkName(name)) {
+            throw new Error("Nome inválido. O nome deve conter apenas letras e espaços.");
+        }
         this.name = name;
     }
 
@@ -51,7 +55,14 @@ export class Usuario {
         this.email = email;
     }
 
+    static checkName(value: string): boolean {
+        // Regex que permite apenas letras (maiúsculas e minúsculas) e espaços
+        const nameRegex = /^[a-zA-Z\s]+$/;
+        return nameRegex.test(value);
+    }
+
     static create(name: string, email: string, password: string, id?: string): Usuario {
+        if (!Usuario.checkName(name)) throw new Error("Nome inválido. O nome deve conter apenas letras e espaços.");
         if (!name || !email || !password) throw new Error("Nome, email e senha são obrigatórios.");
         if (!Usuario.checkEmail(email)) throw new Error("Email inválido.");
         if (!Usuario.checkPassword(password)) throw new Error("Senha inválida. Deve ter pelo menos 8 caracteres, uma letra maiúscula e um número.");

@@ -69,9 +69,32 @@ const EditUser: React.FC = () => {
 
         const payload: { name?: string; email?: string; senha?: string } = {};
 
-        if (name !== user?.name) payload.name = name;
-        if (email !== user?.email) payload.email = email;
-        if (password) payload.senha = password;
+        if (name !== user?.name) {
+            const nameRegex = /^[a-zA-Z\s]+$/;
+            if (!nameRegex.test(name)) {
+                return setError("O nome deve conter apenas letras e espaços.");
+            }
+            payload.name = name;
+        }
+
+        if (email !== user?.email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                return setError("O formato do e-mail é inválido.");
+            }
+            payload.email = email;
+        }
+
+        if (password) {
+            if (password !== confirmPassword) {
+                return setError("As senhas não coincidem.");
+            }
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+            if (!passwordRegex.test(password)) {
+                return setError("A senha deve ter no mínimo 8 caracteres, com maiúscula, minúscula e número.");
+            }
+            payload.senha = password;
+        }
 
         if (Object.keys(payload).length === 0) {
             return setError("Nenhuma alteração para salvar.");

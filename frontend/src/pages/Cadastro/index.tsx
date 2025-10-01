@@ -16,6 +16,11 @@ const Cadastro: React.FC = () => {
     const [error, setError] = useState('');
 
     const handleSignup = async () => {
+        const nameRegex = /^[a-zA-Z\s]+$/;
+        if (!nameRegex.test(nome)) {
+            return setError("O nome deve conter apenas letras e espaços.");
+        }
+
         if (!nome || !email || !senha || !senhaConf) {
             return setError("Preencha todos os campos");
         }
