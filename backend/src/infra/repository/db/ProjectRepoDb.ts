@@ -59,12 +59,18 @@ export class ProjectRepoDb {
   }
 
   async update(id: number, project: Projeto): Promise<void> {
-    await this.connection('projetos')
-      .where({ id })
-      .update({
-        titulo: project.getTitulo(),
-        descricao: project.getDescricao()
-      });
+    try {
+        await this.connection('projetos')
+          .where({ id })
+          .update({
+            titulo: project.getTitulo(),
+            descricao: project.getDescricao()
+          });
+          
+    } catch (error) {
+        console.error(`[Knex Error] Falha ao atualizar projeto ID ${id}:`, error);
+        throw new Error("Falha na persistência de dados do projeto."); 
+    }
   }
 
   async delete(id: number): Promise<void> {

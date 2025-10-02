@@ -1,4 +1,5 @@
 export class Projeto {
+
   private id?: number;
   private titulo: string;
   private descricao?: string;
@@ -26,5 +27,15 @@ export class Projeto {
 
   public getParticipantes() {
     return this.participantes;
+  }
+    public setTitulo(novoTitulo: string): void {
+        if (!novoTitulo || novoTitulo.trim().length === 0) {
+            throw new Error("O título do projeto não pode ser vazio.");
+        }
+        this.titulo = novoTitulo;
+    }
+
+    public setDescricao(novaDescricao: string): void {
+        this.descricao = novaDescricao || ""; 
   }
 }

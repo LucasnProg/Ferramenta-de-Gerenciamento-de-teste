@@ -6,6 +6,7 @@ type Props = {
     onClick?: () => void;
     type?: "button" | "submit" | "reset";
     style?: React.CSSProperties;
+    disabled?: boolean;
 };
 
 const Button: React.FC<Props> = ({ children, onClick, type = "button", style }) => {

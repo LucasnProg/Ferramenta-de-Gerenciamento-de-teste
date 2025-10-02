@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
+import ProjectEditModal from '../../components/ProjectEditModal';
 import { 
     PageContainer, 
     Header, 
@@ -11,7 +12,8 @@ import {
     TabContent,
     DescriptionCard,
     CardTitle,
-    CardText  
+    CardText,  
+    EditButton
 } from './styles';
 
 interface Project {
@@ -29,6 +31,7 @@ const ProjectDetail: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('dashboard');
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchProject = async () => {
@@ -55,17 +58,25 @@ const ProjectDetail: React.FC = () => {
         fetchProject();
     }, [id, user]);
 
-
+    const handleProjectUpdate = (updatedProject: Project) => {
+        setProject(updatedProject);
+    };
   const renderTabContent = () => {
     if (!project) return null;
     switch (activeTab) {
       case 'dashboard':
-        return (
-          <DescriptionCard>
-            <CardTitle>Descrição do Projeto</CardTitle>
-            <CardText>{project.descricao || "Este projeto não possui uma descrição."}</CardText>
-          </DescriptionCard>
-        );
+          return (
+            <>
+              <EditButton 
+                onClick={() => navigate(`/home/projeto/editar/${id}`)}               >
+                Editar Projeto
+              </EditButton>
+              <DescriptionCard>
+                <CardTitle>Descrição do Projeto</CardTitle>
+                <CardText>{project.descricao || "Este projeto não possui uma descrição."}</CardText>
+              </DescriptionCard>
+            </>
+          );
       case 'backlog':
         return <div>Aqui ficará o Backlog do projeto.</div>;
       case 'ciclo-teste':
@@ -84,6 +95,13 @@ const ProjectDetail: React.FC = () => {
 
   return (
     <PageContainer>
+      {isEditModalOpen && project && (
+                <ProjectEditModal 
+                    project={project}
+                    onClose={() => setIsEditModalOpen(false)}
+                    onSuccess={handleProjectUpdate}
+                />
+            )}
       <Header>
         <ProjectTitle>{project ? project.titulo : 'Projeto'}</ProjectTitle>
         <BackButton onClick={() => navigate(-1)}>Voltar</BackButton>

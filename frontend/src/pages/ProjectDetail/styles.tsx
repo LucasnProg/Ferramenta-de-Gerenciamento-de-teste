@@ -86,3 +86,25 @@ export const CardText = styled.p`
   color: #555;
   line-height: 1.7;
 `;
+
+export const EditButton = styled.button`
+  /* Copia o estilo do BackButton para padronização */
+  background-color: #6c757d; 
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 12px; /* Menor que o Voltar (10px 20px) para caber na descrição */
+  font-size: 0.9rem; 
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  /* Posicionamento (float: right) para colocá-lo no canto do card */
+  float: right; 
+  margin-top: -5px; 
+  margin-right: -5px;
+
+  &:hover {
+    background-color: #5a6268;
+  }
+`;

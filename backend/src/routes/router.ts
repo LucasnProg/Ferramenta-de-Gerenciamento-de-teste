@@ -12,6 +12,8 @@ import { CreateProject } from "../controller/CreateProject";
 import { authMiddleware } from "../middleware/authMiddleware";
 import { ListProjectsByUser } from "../controller/ListProjectsByUser";
 import { GetProjectById } from "../controller/GetProjectById";
+import { EditProject } from '../controller/EditProject';
+
 
 
 const router = Router();
@@ -27,6 +29,7 @@ const projectRepo = new ProjectRepoDb();
 const createProject = new CreateProject(projectRepo);
 const listProjectsByUser = new ListProjectsByUser(projectRepo);
 const getProjectById = new GetProjectById(projectRepo);
+const editProjectController = new EditProject(projectRepo);
 
 // Listar usuários
 router.get("/usuario", (req: Request, res: Response) => {
@@ -78,5 +81,8 @@ router.post("/projeto", authMiddleware, (req: Request, res: Response) => createP
 router.get("/projetos", authMiddleware, (req, res) => listProjectsByUser.execute(req, res));
 
 router.get("/projeto/:id", authMiddleware, (req, res) => getProjectById.execute(req, res));
+
+router.put('/projeto/:id', (req: Request, res: Response) => {
+  editProjectController.execute(req, res)});
 
 export { router };

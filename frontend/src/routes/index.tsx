@@ -9,6 +9,7 @@ import HomeContent from '../pages/Home/HomeContent';
 import EditUser from '../pages/EditUser';
 import DeleteUser from '../pages/DeleteUser';
 import ProjectDetail from "../pages/ProjectDetail";
+import EditProjectPage from '../pages/EditProjectPage';
 
 const Private: FC<{ children: React.ReactElement }> = ({ children }) => {
     const { signed } = useAuth();
@@ -27,6 +28,7 @@ const RoutesApp: FC = () => {
                     <Route path="edit-user" element={<EditUser />} />
                     <Route path="delete-user" element={<DeleteUser />} />
                     <Route path="projeto/:id" element={<ProjectDetail />} />
+                    <Route path="projeto/editar/:id" element={<EditProjectPage />} />
                 </Route>
 
                 <Route path="*" element={<Login />} />
