@@ -14,6 +14,7 @@ import { ListProjectsByUser } from "../controller/ListProjectsByUser";
 import { GetProjectById } from "../controller/GetProjectById";
 import { EditProject } from '../controller/EditProject';
 import { CheckEmailExists } from "../controller/CheckEmailExists";
+import { ResetPassword } from "../controller/ResetPassword";
 
 
 const router = Router();
@@ -30,7 +31,8 @@ const createProject = new CreateProject(projectRepo);
 const listProjectsByUser = new ListProjectsByUser(projectRepo);
 const getProjectById = new GetProjectById(projectRepo);
 const editProjectController = new EditProject(projectRepo);
-const checkEmail = new CheckEmailExists(usersRepository)
+const checkEmail = new CheckEmailExists(usersRepository);
+const resetPass = new ResetPassword(usersRepository);
 
 // Listar usuários
 router.get("/usuarios", (req: Request, res: Response) => {
@@ -79,6 +81,11 @@ router.delete("/usuario/:id", (req: Request, res: Response) => {
 //Verificar Email Usuário
 router.get("/check-email", (req: Request, res: Response) => {
   checkEmail.execute(req, res);
+});
+
+//Troca a senha quando o usuário esquece
+router.post("/esqueceu-a-senha", (req: Request, res: Response) => {
+    resetPass.execute(req, res);
 });
 
 router.post("/projeto", authMiddleware, (req: Request, res: Response) => createProject.execute(req, res));

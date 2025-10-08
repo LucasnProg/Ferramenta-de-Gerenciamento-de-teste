@@ -9,6 +9,7 @@ interface AuthContextType {
   logout: () => void;
   updateUser: (data: Partial<User>) => void;
   checkEmailExist: (emailInput: string) => Promise<boolean>;
+  resetPass: (emailInput : string, senha: string) => Promise<string | void>;
 }
 
 const useAuth = (): AuthContextType => {

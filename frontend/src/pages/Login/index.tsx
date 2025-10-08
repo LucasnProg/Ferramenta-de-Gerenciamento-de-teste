@@ -12,6 +12,7 @@ const Login: React.FC = () => {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [error, setError] = useState('');
+    const [loginAttempts, setLoginAttempts] = useState(0);
 
     const handleLogin = async () => {
         if (!email || !senha) {
@@ -23,9 +24,11 @@ const Login: React.FC = () => {
 
         if (result) {
             setError(result);
+            setLoginAttempts(prevAttempts => prevAttempts + 1);
             return;
         }
 
+        setLoginAttempts(0);
         navigate('/home');
     };
 
@@ -55,9 +58,11 @@ const Login: React.FC = () => {
                         <Link to="/cadastro">&nbsp;Registre-se</Link>
                     </C.Strong>
                 </C.LabelSignup>
-                <C.ForgotPass>
-                    <Link to="">&nbsp;Esqueceu a sua senha?</Link>
-                </C.ForgotPass>
+                {loginAttempts >= 3 && (
+                    <C.ForgotPass>
+                        <Link to="/forgot-password">&nbsp;Esqueceu a sua senha?</Link>
+                    </C.ForgotPass>
+                )}
             </C.Content>
         </C.Container>
     );

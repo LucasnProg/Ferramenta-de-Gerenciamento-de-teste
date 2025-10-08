@@ -60,7 +60,6 @@ const EditUser: React.FC = () => {
                 return setError("As senhas não coincidem.");
             }
 
-            // Regex para validar a força da senha (o mesmo do backend)
             const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
             if (!passwordRegex.test(password)) {
                 return setError("A senha deve ter no mínimo 8 caracteres, com ao menos uma letra maiúscula, uma minúscula e um número.");

@@ -17,6 +17,7 @@ interface AuthContextType {
   logout: () => void;
   updateUser: (data: Partial<User>) => void;
   checkEmailExist: (emailInput: string) => Promise<boolean>;
+  resetPass: (emailInput : string, senha: string) => Promise<string | void>;
 }
 
 interface AuthProviderProps {
@@ -105,9 +106,26 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       console.error("Erro ao conectar com o servidor:", err);
       return false; 
     }
-}
+  }
+
+  const resetPass = async (emailInput: string, senha : string): Promise<void | string> => {
+    try {
+        const res = await fetch("http://localhost:4000/esqueceu-a-senha", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ emailInput, senha }),
+        });
+
+        const data = await res.json();
+
+        
+    } catch (err) {
+        return ("Erro de conexão com o servidor.");
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, signed: !!user, login, cadastro, logout, updateUser, checkEmailExist}}>
+    <AuthContext.Provider value={{ user, signed: !!user, login, cadastro, logout, updateUser, checkEmailExist, resetPass}}>
       {children}
     </AuthContext.Provider>
   );
