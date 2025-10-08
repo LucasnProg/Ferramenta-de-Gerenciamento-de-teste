@@ -24,7 +24,7 @@ export const Content = styled.div`
 `;
 
 export const Label = styled.label`
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 600;
   color: #676767;
 `;
@@ -32,6 +32,29 @@ export const Label = styled.label`
 export const LabelSignup = styled.label`
   font-size: 16px;
   color: #676767;
+
+  a {
+    text-decoration: none;
+    color: #676767;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
+
+export const ForgotPass = styled.label`
+  font-size: 16px;
+  color: #676767;
+
+  a {
+    text-decoration: none;
+    color: #676767;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 `;
 
 export const LabelError = styled.label`

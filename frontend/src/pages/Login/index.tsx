@@ -55,6 +55,9 @@ const Login: React.FC = () => {
                         <Link to="/cadastro">&nbsp;Registre-se</Link>
                     </C.Strong>
                 </C.LabelSignup>
+                <C.ForgotPass>
+                    <Link to="">&nbsp;Esqueceu a sua senha?</Link>
+                </C.ForgotPass>
             </C.Content>
         </C.Container>
     );
