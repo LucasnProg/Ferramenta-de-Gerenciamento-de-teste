@@ -69,7 +69,7 @@ export class ProjectRepoDb {
           
     } catch (error) {
         console.error(`[Knex Error] Falha ao atualizar projeto ID ${id}:`, error);
-        throw new Error("Falha na persistência de dados do projeto."); 
+        throw new Error("Falha na persistência de dados do projeto.(Máximo de 41 caracteres para o Título)"); 
     }
   }
 

@@ -106,7 +106,7 @@ const EditProjectPage: FC = () => {
             <S.PageTitle>Editar Projeto</S.PageTitle>
             
             <S.Form onSubmit={handleSubmit}>
-                
+                <label>Título:</label>
                 <Input 
                     type="text"
                     placeholder="Digite o novo título"
