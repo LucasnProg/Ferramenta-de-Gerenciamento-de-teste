@@ -6,7 +6,7 @@ import Input from '../../components/Input';
 import * as C from './styles';
 
 const Cadastro: React.FC = () => {
-    const { cadastro } = useAuth();
+    const { cadastro, checkEmailExist } = useAuth();
     const navigate = useNavigate();
 
     const [nome, setNome] = useState('');
@@ -22,12 +22,16 @@ const Cadastro: React.FC = () => {
         }
 
         if (!nome || !email || !senha || !senhaConf) {
-            return setError("Preencha todos os campos");
+            return setError("Preencha todos os campos.");
         }
         if (senha !== senhaConf) {
-            return setError("As senhas não são iguais");
+            return setError("As senhas não são iguais.");
         }
-
+        const emailJaExiste = await checkEmailExist(email);
+        if (emailJaExiste) {
+            return setError("Email já cadastrado no sistema.");
+        }
+        
         const result = await cadastro(nome, email, senha);
 
         if (result) {

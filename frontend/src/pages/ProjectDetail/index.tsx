@@ -67,10 +67,9 @@ const ProjectDetail: React.FC = () => {
       case 'dashboard':
           return (
             <>
-              <EditButton 
-                onClick={() => navigate(`/home/projeto/editar/${id}`)}               >
-                Editar Projeto
-              </EditButton>
+            <EditButton onClick={() => navigate(`/home/projeto/editar/${id}`)}>
+                Editar projeto
+            </EditButton>
               <DescriptionCard>
                 <CardTitle>Descrição do Projeto</CardTitle>
                 <CardText>{project.descricao || "Este projeto não possui uma descrição."}</CardText>
@@ -104,11 +103,10 @@ const ProjectDetail: React.FC = () => {
             )}
       <Header>
         <ProjectTitle>{project ? project.titulo : 'Projeto'}</ProjectTitle>
-        <BackButton onClick={() => navigate(-1)}>Voltar</BackButton>
+        <BackButton onClick={() => navigate('/home')}>Voltar</BackButton>
       </Header>
 
       <TabNav>
-        {/* Renomeado para 'Dashboard' */}
         <TabButton isActive={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')}>
           Dashboard
         </TabButton>

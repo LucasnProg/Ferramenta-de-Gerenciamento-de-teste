@@ -16,6 +16,7 @@ interface AuthContextType {
   cadastro: (name: string, email: string, password: string) => Promise<string | void>;
   logout: () => void;
   updateUser: (data: Partial<User>) => void;
+  checkEmailExist: (emailInput: string) => Promise<boolean>;
 }
 
 interface AuthProviderProps {
@@ -85,8 +86,28 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem("user_token");
   };
 
+
+  const checkEmailExist = async (emailInput: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`http://localhost:4000/check-email?email=${encodeURIComponent(emailInput)}`, {
+        method: "GET"
+      });
+
+      if (!res.ok) {
+        console.error("Erro ao verificar e-mail:", await res.text());
+        return false; 
+      }
+
+      const data = await res.json();
+      return data.exists;
+
+    } catch (err: any) {
+      console.error("Erro ao conectar com o servidor:", err);
+      return false; 
+    }
+}
   return (
-    <AuthContext.Provider value={{ user, signed: !!user, login, cadastro, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, signed: !!user, login, cadastro, logout, updateUser, checkEmailExist}}>
       {children}
     </AuthContext.Provider>
   );

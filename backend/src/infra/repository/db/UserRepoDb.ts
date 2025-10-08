@@ -62,4 +62,9 @@ export class UserRepoDb implements UserRepository {
         await this.connection('usuarios').where({ id }).del();
     }
 
+    async emailExists(email: string): Promise<boolean> {
+        const user = await this.connection('usuarios').where({ email }).first();
+        return !!user; 
+    }
+
 }

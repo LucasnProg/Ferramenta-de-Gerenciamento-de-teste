@@ -8,6 +8,7 @@ interface AuthContextType {
   cadastro: (name: string, email: string, senha: string) => Promise<string | void>;
   logout: () => void;
   updateUser: (data: Partial<User>) => void;
+  checkEmailExist: (emailInput: string) => Promise<boolean>;
 }
 
 const useAuth = (): AuthContextType => {

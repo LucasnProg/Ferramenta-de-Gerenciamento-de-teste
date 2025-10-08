@@ -13,26 +13,27 @@ import { authMiddleware } from "../middleware/authMiddleware";
 import { ListProjectsByUser } from "../controller/ListProjectsByUser";
 import { GetProjectById } from "../controller/GetProjectById";
 import { EditProject } from '../controller/EditProject';
-
+import { CheckEmailExists } from "../controller/CheckEmailExists";
 
 
 const router = Router();
 
 const metricsService = new MetricsService();
-const repository = new UserRepoDb();
-const userCreate = new CreateUser(repository);
-const usersList = new UsersList(repository);
-const loginUser = new LoginUser(repository);
-const editUser = new EditUser(repository);
-const deleteUser = new DeleteUser(repository);
+const usersRepository = new UserRepoDb();
+const userCreate = new CreateUser(usersRepository);
+const usersList = new UsersList(usersRepository);
+const loginUser = new LoginUser(usersRepository);
+const editUser = new EditUser(usersRepository);
+const deleteUser = new DeleteUser(usersRepository);
 const projectRepo = new ProjectRepoDb();
 const createProject = new CreateProject(projectRepo);
 const listProjectsByUser = new ListProjectsByUser(projectRepo);
 const getProjectById = new GetProjectById(projectRepo);
 const editProjectController = new EditProject(projectRepo);
+const checkEmail = new CheckEmailExists(usersRepository)
 
 // Listar usuários
-router.get("/usuario", (req: Request, res: Response) => {
+router.get("/usuarios", (req: Request, res: Response) => {
   usersList.execute(req, res);
 });
 
@@ -45,7 +46,7 @@ router.post("/usuario", async (req: Request, res: Response) => {
 
   try {
     const user = Usuario.create(name, email, password);
-    await repository.save(user);
+    await usersRepository.save(user);
 
   const isPasswordCorrect = Usuario.verifyPassword(password, user.getPassword());
 
@@ -75,6 +76,10 @@ router.delete("/usuario/:id", (req: Request, res: Response) => {
     deleteUser.execute(req, res);
 });
 
+//Verificar Email Usuário
+router.get("/check-email", (req: Request, res: Response) => {
+  checkEmail.execute(req, res);
+});
 
 router.post("/projeto", authMiddleware, (req: Request, res: Response) => createProject.execute(req, res));
 

@@ -18,7 +18,7 @@ const Login: React.FC = () => {
             setError("Preencha todos os campos");
             return;
         }
-
+        
         const result = await login(email, senha);
 
         if (result) {
