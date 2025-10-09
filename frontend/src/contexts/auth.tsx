@@ -108,12 +108,12 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
-  const resetPass = async (emailInput: string, senha : string): Promise<void | string> => {
+  const resetPass = async (email: string, novaSenha : string): Promise<void | string> => {
     try {
         const res = await fetch("http://localhost:4000/esqueceu-a-senha", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ emailInput, senha }),
+            body: JSON.stringify({ email, novaSenha }),
         });
 
         const data = await res.json();

@@ -37,7 +37,6 @@ export class UserRepoDb implements UserRepository {
         const user = await this.connection('usuarios').where({ email }).first();
         if (!user) return null;
 
-        // usa fromDatabase em vez de create
         return Usuario.fromDatabase(user.name, user.email, user.password, user.id);
     }
 

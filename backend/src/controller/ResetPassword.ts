@@ -5,9 +5,9 @@ export class ResetPassword {
     constructor(private readonly repository: UserRepoDb) {}
 
     async execute(req: Request, res: Response) {
-        const { email, newPassword } = req.body;
+        const { email, novaSenha } = req.body;
 
-        if (!email || !newPassword) {
+        if (!email || !novaSenha) {
             return res.status(400).json({ error: "E-mail e nova senha são obrigatórios." });
         }
 
@@ -18,7 +18,7 @@ export class ResetPassword {
                 return res.status(404).json({ error: "Usuário não encontrado." });
             }
 
-            user.setPassword(newPassword);
+            user.setPassword(novaSenha);
 
             await this.repository.update(user);
 
