@@ -60,7 +60,7 @@ const Login: React.FC = () => {
                 </C.LabelSignup>
                 {loginAttempts >= 3 && (
                     <C.ForgotPass>
-                        <Link to="/forgot-password">&nbsp;Esqueceu a sua senha?</Link>
+                        <Link to="/Esqueceu-a-senha">&nbsp;Esqueceu a sua senha?</Link>
                     </C.ForgotPass>
                 )}
             </C.Content>
