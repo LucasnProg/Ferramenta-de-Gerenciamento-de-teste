@@ -13,7 +13,8 @@ import {
     DescriptionCard,
     CardTitle,
     CardText,  
-    EditButton
+    EditButton,
+    DeleteButton
 } from './styles';
 
 interface Project {
@@ -61,12 +62,44 @@ const ProjectDetail: React.FC = () => {
     const handleProjectUpdate = (updatedProject: Project) => {
         setProject(updatedProject);
     };
+
+  const handleDelete = async () => {
+        if (!project) return;
+        const isConfirmed = window.confirm(
+            `Você tem certeza que deseja excluir o projeto "${project.titulo}"? Esta ação não pode ser desfeita.`
+        );
+
+        if (!isConfirmed) {
+            return; 
+        }
+
+        try {
+            const response = await fetch(`http://localhost:4000/projeto/${project.id}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Falha ao excluir o projeto.");
+            }
+
+            alert(`Projeto "${project.titulo}" excluído com sucesso!`);
+            navigate('/home'); 
+
+        } catch (err: any) {
+            alert(`Erro na exclusão: ${err.message}`);
+            console.error("Erro na exclusão do projeto:", err);
+        }
+    };
   const renderTabContent = () => {
     if (!project) return null;
     switch (activeTab) {
       case 'dashboard':
           return (
             <>
+            <DeleteButton onClick={handleDelete}>
+              Excluir projeto
+              </DeleteButton>
             <EditButton onClick={() => navigate(`/home/projeto/editar/${id}`)}>
                 Editar projeto
             </EditButton>

@@ -106,3 +106,22 @@ export const EditButton = styled.button`
     background-color: #5a6268;
   }
 `;
+export const DeleteButton = styled.button`
+  background-color: #dc3545; 
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 12px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  float: right; 
+  margin-top: 15px; 
+  margin-right: 10px; 
+
+  &:hover {
+    background-color: #c82333;
+  }
+`;
