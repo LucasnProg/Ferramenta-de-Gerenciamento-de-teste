@@ -14,6 +14,27 @@ const Login: React.FC = () => {
     const [error, setError] = useState('');
     const [loginAttempts, setLoginAttempts] = useState(0);
 
+    const checkNotifications = async (userId: string) => {
+      try {
+          const res = await fetch(`http://localhost:4000/notifications`, { headers: { 'user-id': userId } });
+          if (res.ok) {
+              const notifications: { projetoId: number, titulo: string }[] = await res.json();
+              if (notifications.length > 0) {
+                  const projectNames = notifications.map(n => n.titulo).join(', ');
+                  alert(`Você foi adicionado aos seguintes projetos: ${projectNames}`);
+                  notifications.forEach(async (n) => {
+                      await fetch(`http://localhost:4000/notifications/project/${n.projetoId}`, {
+                          method: 'PUT',
+                          headers: { 'user-id': userId }
+                      });
+                  });
+              }
+          }
+      } catch (error) {
+          console.error("Erro ao buscar notificações:", error);
+      }
+    };
+
     const handleLogin = async () => {
         if (!email || !senha) {
             setError("Preencha todos os campos");
@@ -28,8 +49,13 @@ const Login: React.FC = () => {
             return;
         }
 
-        setLoginAttempts(0);
-        navigate('/home');
+        const userToken = localStorage.getItem("user_token");
+        if (userToken) {
+            const loggedUser = JSON.parse(userToken);
+            await checkNotifications(loggedUser.id);
+        }
+
+      navigate('/home');
     };
 
     return (

@@ -21,7 +21,8 @@ export class GetProjectById {
       
       const participantes = projeto.getParticipantes();
       const userId = user.getId().getValue();
-      if (!participantes.has(userId)) {
+
+      if (!participantes.some(p => p.id === userId)) {
         return res.status(403).json({ error: "Acesso negado a este projeto." });
       }
 
@@ -29,7 +30,7 @@ export class GetProjectById {
         id: projeto.getId(),
         titulo: projeto.getTitulo(),
         descricao: projeto.getDescricao(),
-        participantes: Object.fromEntries(participantes)
+        participantes: participantes
       });
 
     } catch (err: any) {

@@ -17,10 +17,14 @@ export class CreateProject {
     }
 
     try {
-      const creatorId = user.getId().getValue();
-      const projeto = new Projeto(titulo, descricao, creatorId);
+      const creator = {
+          id: user.getId().getValue(),
+          name: user.getName(),
+          email: user.getEmail()
+      };
+      const projeto = new Projeto(titulo, descricao, creator);
 
-      const projetoId = await this.repository.save(projeto, creatorId);
+      const projetoId = await this.repository.save(projeto, creator.id);
       
       res.status(201).json({ message: "Projeto criado com sucesso!", projetoId });
 

@@ -125,3 +125,39 @@ export const DeleteButton = styled.button`
     background-color: #c82333;
   }
 `;
+
+export const ParticipantsTable = styled.table`
+  width: 100%;
+  border-collapse: collapse; /* Remove espaços entre as bordas */
+  margin-top: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border-radius: 8px;
+  overflow: hidden; /* Garante que o border-radius funcione com a tabela */
+`;
+
+export const Th = styled.th`
+  background-color: #f8f9fa; /* Fundo cinza claro para o cabeçalho */
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+`;
+
+export const Td = styled.td`
+  padding: 12px 15px;
+  border-bottom: 1px solid #eee; /* Linha separadora entre linhas */
+  color: #495057;
+`;
+
+export const Tr = styled.tr`
+  &:last-child {
+    ${Td} {
+      border-bottom: none; /* Remove a borda da última linha */
+    }
+  }
+  &:hover {
+    background-color: #f1f3f5; /* Efeito hover suave */
+  }
+`;

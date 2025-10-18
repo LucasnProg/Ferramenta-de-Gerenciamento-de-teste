@@ -1,15 +1,22 @@
+export interface Participant {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
 export class Projeto {
 
   private id?: number;
   private titulo: string;
   private descricao?: string;
-  private participantes: Map<string, string> = new Map();
+  private participantes: Participant[] = [];
 
-  constructor(titulo: string, descricao: string | undefined, creatorId: string, id?: number) { // 👈 ADICIONADO
+  constructor(titulo: string, descricao: string | undefined, creator: {id: string, name: string, email: string}, id?: number){
     this.id = id;
     this.titulo = titulo;
     this.descricao = descricao;
-    this.participantes.set(creatorId, "Gerente");
+    this.addParticipant(creator.id, creator.name, creator.email, "Gerente");
   }
 
   public getId() {
@@ -25,10 +32,11 @@ export class Projeto {
     return this.descricao;
   }
 
-  public getParticipantes() {
+  public getParticipantes() { 
     return this.participantes;
   }
-    public setTitulo(novoTitulo: string): void {
+
+  public setTitulo(novoTitulo: string): void {
         if (!novoTitulo || novoTitulo.trim().length === 0) {
             throw new Error("O título do projeto não pode ser vazio.");
         }
@@ -37,5 +45,11 @@ export class Projeto {
 
     public setDescricao(novaDescricao: string): void {
         this.descricao = novaDescricao || ""; 
+  }
+
+  public addParticipant(id: string, name: string, email: string, role: string): void {
+    if (!this.participantes.some(p => p.id === id)) {
+        this.participantes.push({ id, name, email, role });
+    }
   }
 }

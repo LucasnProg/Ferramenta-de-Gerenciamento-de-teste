@@ -16,6 +16,9 @@ import { EditProject } from '../controller/EditProject';
 import { CheckEmailExists } from "../controller/CheckEmailExists";
 import { ResetPassword } from "../controller/ResetPassword";
 import { DeleteProject } from '../controller/DeleteProject';
+import { AddParticipant } from "../controller/AddParticipant";
+import { GetNotifications } from "../controller/GetNotifications";
+import { MarkNotificationRead } from "../controller/MarkNotificationRead";
 
 
 const router = Router();
@@ -35,6 +38,9 @@ const editProjectController = new EditProject(projectRepo);
 const checkEmail = new CheckEmailExists(usersRepository);
 const resetPass = new ResetPassword(usersRepository);
 const deleteProjectController = new DeleteProject(projectRepo);
+const addParticipant = new AddParticipant(projectRepo, usersRepository);
+const getNotifications = new GetNotifications(projectRepo);
+const markNotificationRead = new MarkNotificationRead(projectRepo);
 
 // Listar usuários
 router.get("/usuarios", (req: Request, res: Response) => {
@@ -94,11 +100,18 @@ router.post("/esqueceu-a-senha", (req: Request, res: Response) => {
 router.delete('/projeto/:id', (req: Request, res: Response) => {
     deleteProjectController.execute(req, res)}); 
 
+// Adicionar Participante ao Projeto
+router.post("/projeto/:id/participante", authMiddleware, (req: Request, res: Response) => addParticipant.execute(req, res));
+
+//Notificação
+router.get("/notifications", authMiddleware, (req: Request, res: Response) => getNotifications.execute(req, res));
+router.put("/notifications/project/:projectId", authMiddleware, (req: Request, res: Response) => markNotificationRead.execute(req, res));
+
 router.post("/projeto", authMiddleware, (req: Request, res: Response) => createProject.execute(req, res));
 
-router.get("/projetos", authMiddleware, (req, res) => listProjectsByUser.execute(req, res));
+router.get("/projetos", authMiddleware, (req: Request, res: Response) => listProjectsByUser.execute(req, res));
 
-router.get("/projeto/:id", authMiddleware, (req, res) => getProjectById.execute(req, res));
+router.get("/projeto/:id", authMiddleware, (req: Request, res: Response) => getProjectById.execute(req, res));
 
 router.put('/projeto/:id', (req: Request, res: Response) => {
   editProjectController.execute(req, res)});
