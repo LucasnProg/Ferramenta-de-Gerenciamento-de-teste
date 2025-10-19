@@ -3,8 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import ProjectEditModal from '../../components/ProjectEditModal';
 import AddParticipantModal from '../../components/AddParticipantModal';
+import ConfirmationModal from '../../components/ConfirmationModal';
 import Button from '../../components/Button';
-import { 
+import {
     PageContainer, 
     Header, 
     ProjectTitle, 
@@ -43,83 +44,106 @@ interface Project {
 }
 
 const ProjectDetail: React.FC = () => {
-    const { id: projectId } = useParams<{ id: string }>();
-    const { user } = useAuth();
-    const navigate = useNavigate();
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [project, setProject] = useState<Project | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [activeTab, setActiveTab] = useState('dashboard');
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { id: projectId } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [modalError, setModalError] = useState<string | null>(null);
+  const [isLoadingDelete, setIsLoadingDelete] = useState(false);
 
-    const fetchProject = useCallback(async () => {
-      if (!projectId || !user) return;
-      try {
-        setLoading(true); setError('');
-        const response = await fetch(`http://localhost:4000/projeto/${projectId}`, { headers: { 'user-id': user.id } });
-        if (!response.ok) { const d = await response.json(); throw new Error(d.error || 'Erro'); }
-        const data = await response.json();
-        setProject(data);
-      } catch (err: any) { setError(err.message); } 
-      finally { setLoading(false); }
-    }, [projectId, user]);
+  const fetchProject = useCallback(async () => {
+    if (!projectId || !user) return;
+    try {
+      setLoading(true); setError('');
+      const response = await fetch(`http://localhost:4000/projeto/${projectId}`, { headers: { 'user-id': user.id } });
+      if (!response.ok) { const d = await response.json(); throw new Error(d.error || 'Erro'); }
+      const data = await response.json();
+      setProject(data);
+    } catch (err: any) { setError(err.message); } 
+    finally { setLoading(false); }
+  }, [projectId, user]);
 
-    useEffect(() => { fetchProject(); }, [fetchProject]);
+  useEffect(() => { fetchProject(); }, [fetchProject]);
 
-    const handleProjectUpdate = (updatedProject: Project) => {
-        setProject(updatedProject);
-    };
+  const handleProjectUpdate = (updatedProjectData: Partial<Project>) => {
+    setProject((currentProject: Project) => {
+      if (!currentProject) return null; 
+      return { ...currentProject, ...updatedProjectData };
+    });
+    setIsEditModalOpen(false);
+  };
 
-  const handleDelete = async () => {
-        if (!project) return;
-        const isConfirmed = window.confirm(
-            `Você tem certeza que deseja excluir o projeto "${project.titulo}"? Esta ação não pode ser desfeita.`
-        );
+  const handleDeleteClick = () => {
+    setModalError(null);
+    setIsConfirmModalOpen(true);
+  };
 
-        if (!isConfirmed) {
-            return; 
-        }
+  const handleConfirmDeleteProject = async (email: string, password: string) => {
+    if (!project || !user) return;
 
-        try {
-            const response = await fetch(`http://localhost:4000/projeto/${project.id}`, {
-                method: 'DELETE',
-            });
+    if (user?.email !== email) {
+      return setModalError("O e-mail digitado não corresponde ao da sua conta (gerente).");
+    }
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Falha ao excluir o projeto.");
-            }
+    setIsLoadingDelete(true);
+    setModalError(null);
 
-            alert(`Projeto "${project.titulo}" excluído com sucesso!`);
-            navigate('/home'); 
+    try {
+      const response = await fetch(`http://localhost:4000/projeto/${project.id}`, {
+        method: 'DELETE',
+        headers: { 
+          'Content-Type': 'application/json',
+          'user-id': user.id 
+        },
+        body: JSON.stringify({ email, password })
+      });
 
-        } catch (err: any) {
-            alert(`Erro na exclusão: ${err.message}`);
-            console.error("Erro na exclusão do projeto:", err);
-        }
-    };
+      if (response.status === 401 || response.status === 403) {
+        throw new Error("E-mail ou Senha incorreta."); 
+      }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Falha ao excluir o projeto.");
+      }
+
+      alert(`Projeto "${project.titulo}" excluído com sucesso!`);
+      setIsConfirmModalOpen(false);
+      navigate('/home'); 
+
+      } catch (err: any) {
+        setModalError(err.message);
+        console.error("Erro na exclusão do projeto:", err);
+      } finally {
+        setIsLoadingDelete(false);
+      }
+  };
   const renderTabContent = () => {
     if (!project) return null;
+    const manager = project.participantes?.find((p: Participant) => p.role.toLowerCase() === 'gerente');
+    const isManager = user && manager && user.id === manager.id;
     switch (activeTab) {
       case 'dashboard':
-          return (
-            <>
-            <DeleteButton onClick={handleDelete}>
-              Excluir projeto
-              </DeleteButton>
-            <EditButton onClick={() => navigate(`/home/projeto/editar/${id}`)}>
-                Editar projeto
-            </EditButton>
-              <DescriptionCard>
-                <CardTitle>Descrição do Projeto</CardTitle>
-                <CardText>{project.descricao || "Este projeto não possui uma descrição."}</CardText>
-              </DescriptionCard>
-            </>
-          );
+        return (
+          <>
+            {isManager && (
+              <div style={{ float: 'right', marginTop: '-10px' }}>
+                <EditButton onClick={() => setIsEditModalOpen(true)}>Editar projeto</EditButton>
+                <DeleteButton onClick={handleDeleteClick}>Excluir projeto</DeleteButton>
+              </div>
+            )}
+            <DescriptionCard>
+              <CardTitle>Descrição do Projeto</CardTitle>
+              <CardText>{project.descricao || "Este projeto não possui uma descrição."}</CardText>
+            </DescriptionCard>
+          </>
+        );
       case 'participantes':
-        const manager = project.participantes?.find((p: Participant) => p.role.toLowerCase() === 'gerente');
-        const isManager = user && manager && user.id === manager.id;
         return (
           <div>
             {isManager && (
@@ -166,48 +190,59 @@ const ProjectDetail: React.FC = () => {
   }
 
   return (
-    <PageContainer>
-      {isEditModalOpen && project && (
-                <ProjectEditModal 
-                    project={project}
-                    onClose={() => setIsEditModalOpen(false)}
-                    onSuccess={handleProjectUpdate}
-                />
-            )}
-      <Header>
-        <ProjectTitle>{project ? project.titulo : 'Projeto'}</ProjectTitle>
-        <BackButton onClick={() => navigate('/home')}>Voltar</BackButton>
-      </Header>
+    <>
+      <PageContainer>
+        {isEditModalOpen && project && (
+          <ProjectEditModal 
+            project={project}
+            onClose={() => setIsEditModalOpen(false)}
+            onSuccess={handleProjectUpdate}
+          />
+        )}
+        <Header>
+          <ProjectTitle>{project ? project.titulo : 'Projeto'}</ProjectTitle>
+          <BackButton onClick={() => navigate('/home')}>Voltar</BackButton>
+        </Header>
 
-      <TabNav>
-        <TabButton isActive={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')}>
-          Dashboard
-        </TabButton>
-        <TabButton isActive={activeTab === 'participantes'} onClick={() => setActiveTab('participantes')}> 
-          Participantes 
-        </TabButton>
-        <TabButton isActive={activeTab === 'backlog'} onClick={() => setActiveTab('backlog')}>
-          Backlog
-        </TabButton>
-        <TabButton isActive={activeTab === 'ciclo-teste'} onClick={() => setActiveTab('ciclo-teste')}>
-          Ciclo de teste
-        </TabButton>
-      </TabNav>
+        <TabNav>
+          <TabButton isActive={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')}>
+            Dashboard
+          </TabButton>
+          <TabButton isActive={activeTab === 'participantes'} onClick={() => setActiveTab('participantes')}> 
+            Participantes 
+          </TabButton>
+          <TabButton isActive={activeTab === 'backlog'} onClick={() => setActiveTab('backlog')}>
+            Backlog
+          </TabButton>
+          <TabButton isActive={activeTab === 'ciclo-teste'} onClick={() => setActiveTab('ciclo-teste')}>
+            Ciclo de teste
+          </TabButton>
+        </TabNav>
 
-      <TabContent>
-        {renderTabContent()}
-      </TabContent>
-      {showAddModal && project && (
-        <AddParticipantModal
-          projectId={project.id}
-          onClose={() => setShowAddModal(false)}
-          onParticipantAdded={() => {
-            setShowAddModal(false);
-            fetchProject();
-          }}
-        />
-      )}
-    </PageContainer>
+        <TabContent>
+          {renderTabContent()}
+        </TabContent>
+        {showAddModal && project && (
+          <AddParticipantModal
+            projectId={project.id}
+            onClose={() => setShowAddModal(false)}
+            onParticipantAdded={() => {
+              setShowAddModal(false);
+              fetchProject();
+            }}
+          />
+        )}
+      </PageContainer>
+      <ConfirmationModal
+        isOpen={isConfirmModalOpen}
+        title={`Confirmar Exclusão do Projeto "${project?.titulo}"`}
+        message="Esta ação não pode ser desfeita. Para confirmar, digite seu e-mail e senha de gerente."
+        isLoading={isLoadingDelete}
+        error={modalError}
+        onConfirm={handleConfirmDeleteProject}
+        onCancel={() => setIsConfirmModalOpen(false)}
+      />
+    </>
   );
 };
 

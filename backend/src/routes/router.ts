@@ -97,8 +97,9 @@ router.post("/esqueceu-a-senha", (req: Request, res: Response) => {
 });
 
 // Excluir Projeto
-router.delete('/projeto/:id', (req: Request, res: Response) => {
-    deleteProjectController.execute(req, res)}); 
+router.delete('/projeto/:id', authMiddleware, (req: Request, res: Response) => {
+    deleteProjectController.execute(req, res)
+});
 
 // Adicionar Participante ao Projeto
 router.post("/projeto/:id/participante", authMiddleware, (req: Request, res: Response) => addParticipant.execute(req, res));

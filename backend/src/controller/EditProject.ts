@@ -9,17 +9,24 @@ export class EditProject {
         try {
             const { id } = req.params;
             const projectId = parseInt(id, 10);
-
+            const requestingUser = req.user;
             const { titulo, descricao } = req.body;
             
             if (isNaN(projectId)) {
                 return res.status(400).json({ error: "ID de projeto inválido." });
             }
+            if (!requestingUser) return res.status(401).json({ error: "Não autenticado." });
 
             const project = await this.repository.findById(projectId);
 
             if (!project) {
                 return res.status(404).json({ error: "Projeto não encontrado." });
+            }
+
+            const participants = project.getParticipantes();
+            const manager = participants.find(p => p.role.toLowerCase() === 'gerente');
+            if (!manager || manager.id !== requestingUser.getId().getValue()) {
+                return res.status(403).json({ error: "Apenas o gerente pode editar o projeto." });
             }
 
             if (titulo !== undefined) project.setTitulo(titulo);

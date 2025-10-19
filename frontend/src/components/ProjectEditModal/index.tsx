@@ -2,6 +2,15 @@ import React, { useState } from 'react';
 
 import Input from '../Input/index'; 
 import Button from '../Button/index'; 
+import {
+    Overlay,
+    ModalContainer,
+    Title,
+    Form,
+    StyledTextarea, 
+    ErrorText,
+    ButtonGroup
+} from './styles';
 
 interface Project {
   id: number;
@@ -10,9 +19,9 @@ interface Project {
 }
 
 interface EditModalProps {
-  project: Project;
-  onClose: () => void;
-  onSuccess: (updatedProject: Project) => void;
+    project: Project;
+    onClose: () => void;
+    onSuccess: (updatedProject: Partial<Project>) => void;
 }
 
 const ProjectEditModal: React.FC<EditModalProps> = ({ project, onClose, onSuccess }) => {
@@ -31,7 +40,9 @@ const ProjectEditModal: React.FC<EditModalProps> = ({ project, onClose, onSucces
     try {
       const response = await fetch(`http://localhost:4000/projeto/${project.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(body),
       });
 
@@ -39,10 +50,11 @@ const ProjectEditModal: React.FC<EditModalProps> = ({ project, onClose, onSucces
         const errData = await response.json();
         throw new Error(errData.error || 'Erro desconhecido ao editar projeto.');
       }
-      
+
       const data = await response.json();
-      onSuccess({ ...project, titulo: data.project.titulo, descricao: data.project.descricao });
-      onClose(); 
+            // Passa apenas os campos atualizados
+      onSuccess({ titulo: data.project.titulo, descricao: data.project.descricao });
+      onClose();
 
     } catch (err: any) {
       setError(err.message);
@@ -52,32 +64,35 @@ const ProjectEditModal: React.FC<EditModalProps> = ({ project, onClose, onSucces
   };
 
   return (
-    <div>
-      <h2>Editar Projeto</h2>
-      <form onSubmit={handleSubmit}>
-        <Input 
-          type="text"
-          placeholder="Digite o novo título" 
-          value={titulo} 
-          onChange={(e) => setTitulo(e.target.value)} 
-        />
-        <textarea 
-          placeholder="Descrição (opcional)" 
-          rows={4}
-          value={descricao} 
-          onChange={(e) => setDescricao(e.target.value)} 
-          style={{ width: '100%', marginTop: '10px' }}
-        />
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        
-        <Button type="button" onClick={onClose} style={{ marginRight: '10px' }} disabled={loading}>
-          Cancelar
-        </Button>
-        <Button type="submit" disabled={loading}>
-          {loading ? 'Salvando...' : 'Salvar Alterações'}
-        </Button>
-      </form>
-    </div>
+    <Overlay onClick={onClose}>
+      <ModalContainer onClick={(e) => e.stopPropagation()}>
+        <Title>Editar Projeto</Title>
+        <Form onSubmit={handleSubmit}>
+          <Input
+            type="text"
+            placeholder="Digite o novo título"
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+          />
+          <StyledTextarea
+            placeholder="Descrição (opcional)"
+            rows={4}
+            value={descricao}
+            onChange={(e) => setDescricao(e.target.value)}
+          />
+          {error && <ErrorText>{error}</ErrorText>} 
+
+          <ButtonGroup>
+            <Button type="button" onClick={onClose} style={{ backgroundColor: '#6c757d' }} disabled={loading}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Salvando...' : 'Salvar Alterações'}
+            </Button>
+          </ButtonGroup>
+        </Form>
+      </ModalContainer>
+    </Overlay>
   );
 };
 
