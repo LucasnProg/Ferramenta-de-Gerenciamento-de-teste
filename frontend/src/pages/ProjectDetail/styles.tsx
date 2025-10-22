@@ -99,7 +99,7 @@ export const EditButton = styled.button`
   transition: background-color 0.2s;
   
   float: right; 
-  margin-top: 15px; 
+  margin-top: 20px; 
   margin-right: 15px;
 
   &:hover {
@@ -118,7 +118,7 @@ export const DeleteButton = styled.button`
   transition: background-color 0.2s;
   
   float: right; 
-  margin-top: 15px; 
+  margin-top: 20px; 
   margin-right: 10px; 
 
   &:hover {

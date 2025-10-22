@@ -72,7 +72,7 @@ const ProjectDetail: React.FC = () => {
   useEffect(() => { fetchProject(); }, [fetchProject]);
 
   const handleProjectUpdate = (updatedProjectData: Partial<Project>) => {
-    setProject((currentProject: Project) => {
+    setProject((currentProject:  Project|null) => {
       if (!currentProject) return null; 
       return { ...currentProject, ...updatedProjectData };
     });
@@ -147,7 +147,7 @@ const ProjectDetail: React.FC = () => {
         return (
           <div>
             {isManager && (
-            <Button onClick={() => setShowAddModal(true)} style={{ marginBottom: '20px', width: 'auto' }}>
+            <Button onClick={() => setShowAddModal(true)} style={{ marginBottom: '20px', width: 'auto', backgroundColor:'#207733ff' }}>
               + Adicionar Participante
             </Button>
             )}
