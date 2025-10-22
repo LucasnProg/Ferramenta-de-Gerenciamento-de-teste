@@ -5,7 +5,7 @@ import ProjectEditModal from '../../components/ProjectEditModal';
 import AddParticipantModal from '../../components/AddParticipantModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import Button from '../../components/Button';
-import { FaPencilAlt, FaTrash } from 'react-icons/fa';
+import { FaPencilAlt, FaTrash, FaFolderOpen } from 'react-icons/fa';
 import { BacklogItemEditModal } from '../../components/BacklogItemEditModal';
 import {
     PageContainer, 
@@ -29,7 +29,8 @@ import {
     BacklogTd,
     BacklogTr,
     ActionsTd,
-    IconButton
+    IconButton,
+    EmptyStateContainer
 } from './styles';
 
 interface Project {
@@ -267,7 +268,15 @@ const ProjectDetail: React.FC = () => {
           </div>
         );
       case 'backlog':
-        if (backlogLoading) return <p>Carregando backlog...</p>;
+        if (backlogLoading){
+          return (
+            <EmptyStateContainer>
+                <FaFolderOpen />
+                <h3>Nenhum Item no Backlog</h3>
+                <p>Este projeto ainda não possui itens de backlog importados, ou estão sendo carregados.</p>
+            </EmptyStateContainer>
+        );
+        };
         if (backlogError) return <p style={{ color: 'red' }}>Erro ao carregar backlog: {backlogError}</p>;
         if (backlogItems.length === 0) return <p>Nenhum item de backlog importado para este projeto.</p>;
 

@@ -246,3 +246,36 @@ export const IconButton = styled.button`
     }
   }
 `;
+
+export const EmptyStateContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background-color: #fff; /* Fundo branco */
+  border-radius: 8px;
+  border: 1px dashed #ced4da; /* Borda tracejada sutil */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03); /* Sombra leve */
+  color: #6c757d; /* Cor do texto secundário */
+  text-align: center;
+  margin-top: 20px;
+
+  /* Estilo para o ícone */
+  svg {
+    font-size: 3rem; /* Ícone grande */
+    margin-bottom: 15px;
+    opacity: 0.6;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    color: #495057; /* Cor do título */
+    margin: 0 0 5px 0;
+  }
+
+  p {
+    font-size: 1rem;
+    margin: 0;
+  }
+`;
