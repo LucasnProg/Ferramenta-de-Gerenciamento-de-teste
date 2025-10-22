@@ -27,10 +27,8 @@ CREATE TABLE IF NOT EXISTS projetos (
 CREATE TABLE IF NOT EXISTS backlog_items (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     id_projeto INTEGER NOT NULL,
-    jira_key VARCHAR(50) NULL,      
-    tipo VARCHAR(100) NOT NULL,     
-    titulo VARCHAR(255) NOT NULL,   
-    status VARCHAR(100) NULL,       
+    item VARCHAR(255) NOT NULL,
+    descricao TEXT NULL,       
     data_importacao DATETIME DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT backlog_projeto_fk FOREIGN KEY (id_projeto) REFERENCES projetos(id) ON DELETE CASCADE ON UPDATE CASCADE
 );

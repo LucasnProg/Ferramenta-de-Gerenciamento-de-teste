@@ -1,9 +1,12 @@
 export interface BacklogItem {
     id?: number;
     id_projeto: number;
-    jira_key?: string;
-    tipo: string;
-    titulo: string;
-    status?: string;
+    item: string;      
+    descricao?: string; 
     data_importacao?: Date;
+}
+
+export interface NewBacklogItem {
+    item: string;
+    descricao?: string;
 }

@@ -44,10 +44,8 @@ interface Project {
 }
 interface BacklogItem {
     id: number;
-    jira_key?: string;
-    tipo: string;
-    titulo: string;
-    status?: string;
+    item: string;      
+    descricao?: string; 
     data_importacao: string; 
 }
 
@@ -214,33 +212,31 @@ const ProjectDetail: React.FC = () => {
         );
       case 'backlog':
         if (backlogLoading) return <p>Carregando backlog...</p>;
-                if (backlogError) return <p style={{ color: 'red' }}>Erro ao carregar backlog: {backlogError}</p>;
-                if (backlogItems.length === 0) return <p>Nenhum item de backlog importado para este projeto.</p>;
+        if (backlogError) return <p style={{ color: 'red' }}>Erro ao carregar backlog: {backlogError}</p>;
+        if (backlogItems.length === 0) return <p>Nenhum item de backlog importado para este projeto.</p>;
 
-                return (
-                    <div>
-                        <ParticipantsTable>
-                            <thead>
-                                <Tr>
-                                    <Th>Chave Jira</Th>
-                                    <Th>Tipo</Th>
-                                    <Th>Título</Th>
-                                    <Th>Status</Th>
-                                </Tr>
-                            </thead>
-                            <tbody>
-                                {backlogItems.map(item => (
-                                    <Tr key={item.id}>
-                                        <Td>{item.jira_key || '-'}</Td>
-                                        <Td>{item.tipo}</Td>
-                                        <Td>{item.titulo}</Td>
-                                        <Td>{item.status || '-'}</Td>
-                                    </Tr>
-                                ))}
-                            </tbody>
-                        </ParticipantsTable>
-                    </div>
-                );
+        return (
+            <div>
+                <ParticipantsTable>
+                    <thead>
+                        <Tr>
+                            <Th style={{ width: '5%' }}>ID</Th>
+                            <Th style={{ width: '35%' }}>Item</Th>
+                            <Th style={{ width: '60%' }}>Descrição</Th>
+                        </Tr>
+                    </thead>
+                    <tbody>
+                        {backlogItems.map((item, index) => (
+                            <Tr key={item.id}>
+                                <Td>{index + 1}</Td> 
+                                <Td>{item.item}</Td> 
+                                <Td>{item.descricao || '-'}</Td> 
+                            </Tr>
+                        ))}
+                    </tbody>
+                </ParticipantsTable>
+            </div>
+        );
       case 'ciclo-teste':
         return <div>Aqui ficarão os Ciclos de Teste.</div>;
       default:

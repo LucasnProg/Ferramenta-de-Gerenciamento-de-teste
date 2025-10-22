@@ -1,8 +1,7 @@
 import { Knex } from "knex";
 import { Projeto, Participant } from "../../../model/Projeto";;
 import { db } from "./knex";
-import { Usuario } from "../../../model/Usuario";
-import { BacklogItem } from "../../../model/BacklogItem";
+import { Usuario } from "../../../model/Usuario";import { BacklogItem, NewBacklogItem } from "../../../model/BacklogItem";
 
 export class ProjectRepoDb {
   private connection: Knex;
@@ -137,13 +136,11 @@ export class ProjectRepoDb {
         .update({ notificado: true });
   }
 
-  async saveBacklogItems(projectId: number, items: Omit<BacklogItem, 'id' | 'id_projeto' | 'data_importacao'>[]): Promise<void> {
+  async saveBacklogItems(projectId: number, items: NewBacklogItem[]): Promise<void> {
         const itemsToInsert = items.map(item => ({
             id_projeto: projectId,
-            jira_key: item.jira_key,
-            tipo: item.tipo,
-            titulo: item.titulo,
-            status: item.status
+            item: item.item,
+            descricao: item.descricao
         }));
 
         if (itemsToInsert.length > 0) {
@@ -154,7 +151,7 @@ export class ProjectRepoDb {
     async getBacklogItemsByProjectId(projectId: number): Promise<BacklogItem[]> {
         return this.connection('backlog_items')
             .where({ id_projeto: projectId })
-            .select('id', 'jira_key', 'tipo', 'titulo', 'status', 'data_importacao')
-            .orderBy('data_importacao', 'asc'); 
+            .select('id', 'item', 'descricao', 'data_importacao')
+            .orderBy('id', 'asc'); 
     }
 }
