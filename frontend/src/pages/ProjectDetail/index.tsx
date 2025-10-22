@@ -5,6 +5,7 @@ import ProjectEditModal from '../../components/ProjectEditModal';
 import AddParticipantModal from '../../components/AddParticipantModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import Button from '../../components/Button';
+import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import {
     PageContainer, 
     Header, 
@@ -21,7 +22,13 @@ import {
     ParticipantsTable,
     Th,
     Td,
-    Tr
+    Tr,
+    BacklogTable,
+    BacklogTh,
+    BacklogTd,
+    BacklogTr,
+    ActionsTd,
+    IconButton
 } from './styles';
 
 interface Project {
@@ -160,6 +167,17 @@ const ProjectDetail: React.FC = () => {
         setIsLoadingDelete(false);
       }
   };
+
+  const handleEditBacklogItem = (itemId: number) => {
+    console.log("Editar item:", itemId);
+    alert(`Implementar edição para o item ID: ${itemId}`);
+  };
+
+  const handleDeleteBacklogItem = (itemId: number) => {
+    console.log("Excluir item:", itemId);
+    alert(`Implementar exclusão para o item ID: ${itemId}`);
+  };
+
   const renderTabContent = () => {
     if (!project) return null;
     const manager = project.participantes?.find((p: Participant) => p.role.toLowerCase() === 'gerente');
@@ -217,24 +235,44 @@ const ProjectDetail: React.FC = () => {
 
         return (
             <div>
-                <ParticipantsTable>
+                <BacklogTable>
                     <thead>
-                        <Tr>
-                            <Th style={{ width: '5%' }}>ID</Th>
-                            <Th style={{ width: '35%' }}>Item</Th>
-                            <Th style={{ width: '60%' }}>Descrição</Th>
-                        </Tr>
+                        <BacklogTr>
+                            <BacklogTh style={{ width: '7%' }}>ID</BacklogTh>
+                            <BacklogTh style={{ width: '25%' }}>Item</BacklogTh>
+                            <BacklogTh style={{ width: '45%' }}>Descrição</BacklogTh>
+                            <BacklogTh style={{ width: '10%', textAlign: 'center' }}>Ações</BacklogTh>
+                        </BacklogTr>
                     </thead>
                     <tbody>
                         {backlogItems.map((item, index) => (
-                            <Tr key={item.id}>
-                                <Td>{index + 1}</Td> 
-                                <Td>{item.item}</Td> 
-                                <Td>{item.descricao || '-'}</Td> 
-                            </Tr>
+                            <BacklogTr key={item.id}>
+                                <BacklogTd>{index + 1}</BacklogTd>
+                                <BacklogTd>{item.item}</BacklogTd>
+
+                                <BacklogTd title={item.descricao || ''}>
+                                    {item.descricao || '–'}
+                                </BacklogTd>
+                                <ActionsTd>
+                                    <IconButton 
+                                        className="edit"
+                                        title="Editar Item"
+                                        onClick={() => handleEditBacklogItem(item.id)}
+                                    >
+                                        <FaPencilAlt />
+                                    </IconButton>
+                                    <IconButton 
+                                        className="delete"
+                                        title="Excluir Item"
+                                        onClick={() => handleDeleteBacklogItem(item.id)}
+                                    >
+                                        <FaTrash />
+                                    </IconButton>
+                                </ActionsTd>
+                            </BacklogTr>
                         ))}
                     </tbody>
-                </ParticipantsTable>
+                </BacklogTable>
             </div>
         );
       case 'ciclo-teste':

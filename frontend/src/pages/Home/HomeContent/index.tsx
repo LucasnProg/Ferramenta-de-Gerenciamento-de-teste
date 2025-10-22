@@ -63,7 +63,7 @@ const HomeContent: React.FC = () => {
                         onProjectCreated={fetchProjects} 
                     />
                 )}
-                <div style={{ width: '100%' }}> 
+                <div style={{ width: '95%' }}> 
                     <ProjectCreateBox onClick={() => setShowModal(true)} />
                     <ProjectListContainer>
                         {projects.map((project) => (

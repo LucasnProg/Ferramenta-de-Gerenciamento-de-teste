@@ -28,11 +28,11 @@ export const ContainerContent = styled.main`
   padding: 40px;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Alinhamento alterado para o topo */
-  justify-content: flex-start; /* Alinhamento alterado para o topo */
+  align-items: center;
+  justify-content: flex-start;
   max-width: 1200px;   
   width: 90%;          
-  margin: 0 auto;     
+  margin: 0 auto;  
 `;
 
 export const NewProjectButton = styled.button`
@@ -245,7 +245,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose,
     }
     
     if (importJira && !jiraFile) {
-      setError("Para importar dados do JIRA, você deve enviar um arquivo XML.");
+      setError("Para importar dados do JIRA, você deve enviar um arquivo CSV.");
       setIsSubmitting(false);
       return;
     }
