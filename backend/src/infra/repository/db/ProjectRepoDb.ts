@@ -2,6 +2,7 @@ import { Knex } from "knex";
 import { Projeto, Participant } from "../../../model/Projeto";;
 import { db } from "./knex";
 import { Usuario } from "../../../model/Usuario";
+import { BacklogItem } from "../../../model/BacklogItem";
 
 export class ProjectRepoDb {
   private connection: Knex;
@@ -68,11 +69,9 @@ export class ProjectRepoDb {
   }
 
   async findById(id: number): Promise<Projeto | null> {
-    // Busca os dados do projeto
     const projectData = await this.connection('projetos').where({ id }).first();
     if (!projectData) return null;
 
-    // Busca todos os participantes e seus dados da tabela usuarios
     const participantsData = await this.connection('usuarios_projeto as up')
       .join('usuarios as u', 'up.id_usuario', 'u.id')
       .where('up.id_projeto', id)
@@ -80,14 +79,11 @@ export class ProjectRepoDb {
 
     if (!participantsData || participantsData.length === 0) return null;
 
-    // Encontra o criador (gerente) para passar ao construtor
     const creatorData = participantsData.find((p: Participant) => p.role === 'gerente');
     if (!creatorData) return null;
 
-    // Cria a instância do Projeto
     const projeto = new Projeto(projectData.titulo, projectData.descricao, creatorData, projectData.id);
 
-    // Adiciona os outros participantes ao objeto
     participantsData.forEach((p: Participant) => {
         projeto.addParticipant(p.id, p.name, p.email, p.role);
     });
@@ -117,14 +113,14 @@ export class ProjectRepoDb {
 
      if (existing) {
          console.warn(`Usuário ${userId} já é ${role} no projeto ${projectId}.`);
-         return; // Ou lançar um erro informando que já existe
-     }
+         return; 
+    }
 
      await this.connection('usuarios_projeto').insert({
          id_projeto: projectId,
          id_usuario: userId,
          papel_usuario: role,
-         notificado: false // Começa como não notificado
+         notificado: false 
      });
   }
 
@@ -140,4 +136,25 @@ export class ProjectRepoDb {
         .where({ id_usuario: userId, id_projeto: projectId })
         .update({ notificado: true });
   }
+
+  async saveBacklogItems(projectId: number, items: Omit<BacklogItem, 'id' | 'id_projeto' | 'data_importacao'>[]): Promise<void> {
+        const itemsToInsert = items.map(item => ({
+            id_projeto: projectId,
+            jira_key: item.jira_key,
+            tipo: item.tipo,
+            titulo: item.titulo,
+            status: item.status
+        }));
+
+        if (itemsToInsert.length > 0) {
+            await this.connection('backlog_items').insert(itemsToInsert);
+        }
+    }
+
+    async getBacklogItemsByProjectId(projectId: number): Promise<BacklogItem[]> {
+        return this.connection('backlog_items')
+            .where({ id_projeto: projectId })
+            .select('id', 'jira_key', 'tipo', 'titulo', 'status', 'data_importacao')
+            .orderBy('data_importacao', 'asc'); 
+    }
 }

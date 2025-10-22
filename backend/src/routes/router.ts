@@ -19,7 +19,11 @@ import { DeleteProject } from '../controller/DeleteProject';
 import { AddParticipant } from "../controller/AddParticipant";
 import { GetNotifications } from "../controller/GetNotifications";
 import { MarkNotificationRead } from "../controller/MarkNotificationRead";
-
+import { ImportBacklogController } from "../controller/ImportBacklogController"; 
+import { ListBacklogController } from "../controller/ListBacklogController";
+import multer from 'multer'; 
+import path from 'path'; 
+import fs from 'fs';
 
 const router = Router();
 
@@ -41,6 +45,8 @@ const deleteProjectController = new DeleteProject(projectRepo);
 const addParticipant = new AddParticipant(projectRepo, usersRepository);
 const getNotifications = new GetNotifications(projectRepo);
 const markNotificationRead = new MarkNotificationRead(projectRepo);
+const importBacklogController = new ImportBacklogController(projectRepo); 
+const listBacklogController = new ListBacklogController(projectRepo);
 
 // Listar usuários
 router.get("/usuarios", (req: Request, res: Response) => {
@@ -116,5 +122,45 @@ router.get("/projeto/:id", authMiddleware, (req: Request, res: Response) => getP
 
 router.put('/projeto/:id', (req: Request, res: Response) => {
   editProjectController.execute(req, res)});
+
+const uploadDir = path.join(__dirname, '..', '..', 'uploads'); 
+if (!fs.existsSync(uploadDir)) { 
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadDir); 
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${Date.now()}-${file.originalname}`);
+    }
+});
+
+
+const upload = multer({
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'text/csv' || file.originalname.toLowerCase().endsWith('.csv')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Formato de arquivo inválido. Apenas arquivos .csv são permitidos.'));
+        }
+    }
+});
+
+router.post(
+    "/projeto/:id/import-backlog",
+    authMiddleware,
+    upload.single('backlogFile'), 
+    (req: Request, res: Response) => importBacklogController.execute(req, res)
+);
+
+// Rota para listar itens do backlog 
+router.get(
+    "/projeto/:id/backlog",
+    authMiddleware,
+    (req: Request, res: Response) => listBacklogController.execute(req, res)
+);
+
 
 export { router };

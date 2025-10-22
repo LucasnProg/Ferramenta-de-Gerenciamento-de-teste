@@ -224,13 +224,18 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose,
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [importError, setImportError] = useState("");
+  const [importSuccess, setImportSuccess] = useState(""); 
+  const [isImporting, setIsImporting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSubmitting) return;
+    if (isSubmitting || isImporting) return;
 
     setError("");
     setSuccess("");
+    setImportError("");
+    setImportSuccess("");
     setIsSubmitting(true);
 
     if (!title) {
@@ -244,11 +249,13 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose,
       setIsSubmitting(false);
       return;
     }
-    if (jiraFile && !jiraFile.name.endsWith(".xml")) {
-      setError("O arquivo deve ter extensão .xml.");
+    if (jiraFile && !jiraFile.name.toLowerCase().endsWith(".csv")) {
+      setError("O arquivo deve ter extensão .csv.");
       setIsSubmitting(false);
       return;
     }
+
+    let createdProjectId: number | null = null;
 
     try {
         const userToken = localStorage.getItem('user_token');
@@ -275,6 +282,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose,
             throw new Error(data.error || "Ocorreu um erro ao criar o projeto.");
         }
 
+        createdProjectId = data.projetoId;
         setSuccess("Projeto criado com sucesso!");
         onProjectCreated(); 
         
@@ -282,11 +290,49 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose,
           onClose(); 
         }, 2000);
 
-    } catch (err: any) {
-        console.error("Erro ao criar projeto:", err);
-        setError(err.message);
-        setIsSubmitting(false);
-    }
+        if (importJira && jiraFile && createdProjectId) {
+          setIsImporting(true); 
+          setSuccess("Projeto criado. Iniciando importação do backlog..."); 
+
+          const formData = new FormData();
+          formData.append('backlogFile', jiraFile); 
+
+          const importResponse = await fetch(`http://localhost:4000/projeto/${createdProjectId}/import-backlog`, {
+              method: 'POST',
+              headers: {
+                  "user-id": loggedUser.id
+              },
+              body: formData,
+          });
+
+          const importData = await importResponse.json();
+          setIsImporting(false); 
+
+          if (!importResponse.ok) {
+              throw new Error(importData.error || "Erro ao importar o arquivo CSV.");
+          }
+
+          setImportSuccess(importData.message || "Backlog importado com sucesso!");
+          setTimeout(() => onClose(), 2500); 
+
+          } else {
+            setTimeout(() => onClose(), 1500);
+          }
+
+      } catch (err: any) {
+          console.error("Erro no processo:", err);
+          setError(err.message); 
+          if (isImporting) {
+              setImportError(err.message);
+              setSuccess(""); 
+          }
+          setIsSubmitting(false); 
+          setIsImporting(false); 
+      } finally {
+          if (!importJira || !jiraFile) {
+              setIsSubmitting(false);
+          }
+      }
   };
 
   return (
@@ -319,23 +365,32 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ onClose,
 
           {importJira && (
             <AnimatedFileInput
-              type="file"
-              accept=".xml"
-              onChange={(e) => setJiraFile(e.target.files ? e.target.files[0] : null)}
-              file
-              required
+                type="file"
+                accept=".csv" 
+                onChange={(e) => {
+                    setJiraFile(e.target.files ? e.target.files[0] : null);
+                    setError("");
+                    setImportError("");
+                }}
+                file
+                required
             />
           )}
 
           {error && <ErrorMessage>{error}</ErrorMessage>}
-          {success && <SuccessMessage>{success}</SuccessMessage>}
+          {success && !isImporting && <SuccessMessage>{success}</SuccessMessage>}
+          {isImporting && <SuccessMessage>{success}</SuccessMessage>} 
+          {importError && <ErrorMessage>{importError}</ErrorMessage>}
+          {importSuccess && <SuccessMessage>{importSuccess}</SuccessMessage>}
           
           <ButtonContainer>
             <CancelButton type="button" onClick={onClose} disabled={isSubmitting}>
                 Cancelar
             </CancelButton>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Criando...' : 'Criar Projeto'}
+              {isSubmitting && !isImporting ? 'Criando Projeto...' :
+              isImporting ? 'Importando Backlog...' :
+              'Criar Projeto'}
             </Button>
           </ButtonContainer>
         </form>

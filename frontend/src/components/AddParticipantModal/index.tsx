@@ -54,7 +54,7 @@ const AddParticipantModal: React.FC<Props> = ({ projectId, onClose, onParticipan
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'user-id': user!.id // User não será nulo aqui
+                    'user-id': user!.id 
                 },
                 body: JSON.stringify({ email, role })
             });

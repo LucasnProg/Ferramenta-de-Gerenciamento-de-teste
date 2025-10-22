@@ -42,6 +42,14 @@ interface Project {
   descricao?: string; 
   participantes?: Participant[]; 
 }
+interface BacklogItem {
+    id: number;
+    jira_key?: string;
+    tipo: string;
+    titulo: string;
+    status?: string;
+    data_importacao: string; 
+}
 
 const ProjectDetail: React.FC = () => {
   const { id: projectId } = useParams<{ id: string }>();
@@ -56,6 +64,10 @@ const ProjectDetail: React.FC = () => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
   const [isLoadingDelete, setIsLoadingDelete] = useState(false);
+  const [backlogItems, setBacklogItems] = useState<BacklogItem[]>([]);
+  const [backlogLoading, setBacklogLoading] = useState(false);
+  const [backlogError, setBacklogError] = useState('');
+
 
   const fetchProject = useCallback(async () => {
     if (!projectId || !user) return;
@@ -69,7 +81,34 @@ const ProjectDetail: React.FC = () => {
     finally { setLoading(false); }
   }, [projectId, user]);
 
+  const fetchBacklog = useCallback(async () => {
+        if (!projectId || !user) return;
+        setBacklogLoading(true);
+        setBacklogError('');
+        try {
+            const response = await fetch(`http://localhost:4000/projeto/${projectId}/backlog`, {
+                headers: { 'user-id': user.id }
+            });
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || 'Erro ao buscar backlog.');
+            }
+            const data: BacklogItem[] = await response.json();
+            setBacklogItems(data);
+        } catch (err: any) {
+            setBacklogError(err.message);
+        } finally {
+            setBacklogLoading(false);
+        }
+    }, [projectId, user]);
+
   useEffect(() => { fetchProject(); }, [fetchProject]);
+  
+  useEffect(() => {
+        if (activeTab === 'backlog' && backlogItems.length === 0 && !backlogLoading) {
+            fetchBacklog();
+        }
+    }, [activeTab, fetchBacklog, backlogItems.length, backlogLoading]);
 
   const handleProjectUpdate = (updatedProjectData: Partial<Project>) => {
     setProject((currentProject:  Project|null) => {
@@ -174,7 +213,34 @@ const ProjectDetail: React.FC = () => {
           </div>
         );
       case 'backlog':
-        return <div>Aqui ficará o Backlog do projeto.</div>;
+        if (backlogLoading) return <p>Carregando backlog...</p>;
+                if (backlogError) return <p style={{ color: 'red' }}>Erro ao carregar backlog: {backlogError}</p>;
+                if (backlogItems.length === 0) return <p>Nenhum item de backlog importado para este projeto.</p>;
+
+                return (
+                    <div>
+                        <ParticipantsTable>
+                            <thead>
+                                <Tr>
+                                    <Th>Chave Jira</Th>
+                                    <Th>Tipo</Th>
+                                    <Th>Título</Th>
+                                    <Th>Status</Th>
+                                </Tr>
+                            </thead>
+                            <tbody>
+                                {backlogItems.map(item => (
+                                    <Tr key={item.id}>
+                                        <Td>{item.jira_key || '-'}</Td>
+                                        <Td>{item.tipo}</Td>
+                                        <Td>{item.titulo}</Td>
+                                        <Td>{item.status || '-'}</Td>
+                                    </Tr>
+                                ))}
+                            </tbody>
+                        </ParticipantsTable>
+                    </div>
+                );
       case 'ciclo-teste':
         return <div>Aqui ficarão os Ciclos de Teste.</div>;
       default:
