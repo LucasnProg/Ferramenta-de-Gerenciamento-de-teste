@@ -21,6 +21,8 @@ import { GetNotifications } from "../controller/GetNotifications";
 import { MarkNotificationRead } from "../controller/MarkNotificationRead";
 import { ImportBacklogController } from "../controller/ImportBacklogController"; 
 import { ListBacklogController } from "../controller/ListBacklogController";
+import { EditBacklogItemController } from "../controller/EditBackLogController";
+import { DeleteBacklogItemController } from "../controller/DeleteBacklogItemController";
 import multer from 'multer'; 
 import path from 'path'; 
 import fs from 'fs';
@@ -47,6 +49,8 @@ const getNotifications = new GetNotifications(projectRepo);
 const markNotificationRead = new MarkNotificationRead(projectRepo);
 const importBacklogController = new ImportBacklogController(projectRepo); 
 const listBacklogController = new ListBacklogController(projectRepo);
+const editBacklogItemController = new EditBacklogItemController(projectRepo);
+const deleteBacklogItemController = new DeleteBacklogItemController(projectRepo);
 
 // Listar usuários
 router.get("/usuarios", (req: Request, res: Response) => {
@@ -110,7 +114,6 @@ router.delete('/projeto/:id', authMiddleware, (req: Request, res: Response) => {
 // Adicionar Participante ao Projeto
 router.post("/projeto/:id/participante", authMiddleware, (req: Request, res: Response) => addParticipant.execute(req, res));
 
-//Notificação
 router.get("/notifications", authMiddleware, (req: Request, res: Response) => getNotifications.execute(req, res));
 router.put("/notifications/project/:projectId", authMiddleware, (req: Request, res: Response) => markNotificationRead.execute(req, res));
 
@@ -155,12 +158,22 @@ router.post(
     (req: Request, res: Response) => importBacklogController.execute(req, res)
 );
 
-// Rota para listar itens do backlog 
 router.get(
     "/projeto/:id/backlog",
     authMiddleware,
     (req: Request, res: Response) => listBacklogController.execute(req, res)
 );
 
+router.put(
+    "/backlog/:id",
+    authMiddleware, //
+    (req: Request, res: Response) => editBacklogItemController.execute(req, res)
+);
+
+router.delete(
+    "/backlog/:id",
+    authMiddleware, //
+    (req: Request, res: Response) => deleteBacklogItemController.execute(req, res)
+);
 
 export { router };

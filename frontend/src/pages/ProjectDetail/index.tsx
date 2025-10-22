@@ -6,6 +6,7 @@ import AddParticipantModal from '../../components/AddParticipantModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import Button from '../../components/Button';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
+import { BacklogItemEditModal } from '../../components/BacklogItemEditModal';
 import {
     PageContainer, 
     Header, 
@@ -72,6 +73,7 @@ const ProjectDetail: React.FC = () => {
   const [backlogItems, setBacklogItems] = useState<BacklogItem[]>([]);
   const [backlogLoading, setBacklogLoading] = useState(false);
   const [backlogError, setBacklogError] = useState('');
+  const [editingItem, setEditingItem] = useState<BacklogItem | null>(null);
 
 
   const fetchProject = useCallback(async () => {
@@ -168,15 +170,51 @@ const ProjectDetail: React.FC = () => {
       }
   };
 
-  const handleEditBacklogItem = (itemId: number) => {
-    console.log("Editar item:", itemId);
-    alert(`Implementar edição para o item ID: ${itemId}`);
-  };
+  const handleEditBacklogItem = (item: BacklogItem) => {
+        setEditingItem(item);
+    };
 
-  const handleDeleteBacklogItem = (itemId: number) => {
-    console.log("Excluir item:", itemId);
-    alert(`Implementar exclusão para o item ID: ${itemId}`);
-  };
+
+  const handleDeleteBacklogItem = async (itemId: number) => {
+        if (!window.confirm("Tem certeza que deseja excluir este item do backlog? Esta ação não pode ser desfeita.")) {
+            return;
+        }
+
+        if (!user) {
+            alert("Erro de autenticação. Por favor, faça login.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:4000/backlog/${itemId}`, {
+                method: 'DELETE',
+                headers: {
+                    'user-id': user.id
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Falha ao excluir o item.");
+            }
+
+            setBacklogItems(prevItems => prevItems.filter(item => item.id !== itemId));
+            alert(data.message || "Item excluído com sucesso."); 
+        } catch (err: any) {
+            console.error("Erro ao excluir item:", err);
+            alert(`Erro: ${err.message}`);
+        }
+    };
+
+  const handleItemUpdated = (updatedItem: BacklogItem) => {
+        setBacklogItems(prevItems =>
+            prevItems.map(item =>
+                item.id === updatedItem.id ? updatedItem : item
+            )
+        );
+        setEditingItem(null); 
+    };
 
   const renderTabContent = () => {
     if (!project) return null;
@@ -247,25 +285,22 @@ const ProjectDetail: React.FC = () => {
                     <tbody>
                         {backlogItems.map((item, index) => (
                             <BacklogTr key={item.id}>
-                                <BacklogTd>{index + 1}</BacklogTd>
-                                <BacklogTd>{item.item}</BacklogTd>
-
-                                <BacklogTd title={item.descricao || ''}>
+                                <BacklogTd data-label="ID">{index + 1}</BacklogTd>
+                                <BacklogTd data-label="Item" title={item.item}>{item.item}</BacklogTd>
+                                <BacklogTd data-label="Descrição" title={item.descricao || ''}>
                                     {item.descricao || '–'}
                                 </BacklogTd>
                                 <ActionsTd>
-                                    <IconButton 
+                                    <IconButton
                                         className="edit"
                                         title="Editar Item"
-                                        onClick={() => handleEditBacklogItem(item.id)}
-                                    >
+                                        onClick={() => handleEditBacklogItem(item)}>
                                         <FaPencilAlt />
                                     </IconButton>
                                     <IconButton 
                                         className="delete"
                                         title="Excluir Item"
-                                        onClick={() => handleDeleteBacklogItem(item.id)}
-                                    >
+                                        onClick={() => handleDeleteBacklogItem(item.id)}>
                                         <FaTrash />
                                     </IconButton>
                                 </ActionsTd>
@@ -288,7 +323,8 @@ const ProjectDetail: React.FC = () => {
   if (error) {
     return <PageContainer><p style={{ color: 'red' }}>Erro: {error}</p></PageContainer>;
   }
-
+  if (!project) return <p>Projeto não encontrado.</p>;
+  
   return (
     <>
       <PageContainer>
@@ -299,6 +335,13 @@ const ProjectDetail: React.FC = () => {
             onSuccess={handleProjectUpdate}
           />
         )}
+        {editingItem && (
+                    <BacklogItemEditModal
+                        item={editingItem}
+                        onClose={() => setEditingItem(null)}
+                        onItemUpdated={handleItemUpdated}
+                    />
+                )}
         <Header>
           <ProjectTitle>{project ? project.titulo : 'Projeto'}</ProjectTitle>
           <BackButton onClick={() => navigate('/home')}>Voltar</BackButton>

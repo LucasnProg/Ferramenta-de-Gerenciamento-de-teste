@@ -1,7 +1,7 @@
 import { Knex } from "knex";
 import { Projeto, Participant } from "../../../model/Projeto";;
 import { db } from "./knex";
-import { Usuario } from "../../../model/Usuario";import { BacklogItem, NewBacklogItem } from "../../../model/BacklogItem";
+import { BacklogItem, NewBacklogItem } from "../../../model/BacklogItem";
 
 export class ProjectRepoDb {
   private connection: Knex;
@@ -105,7 +105,6 @@ export class ProjectRepoDb {
   }
 
   async addParticipant(projectId: number, userId: string, role: string): Promise<void> {
-     // Verifica se já existe para evitar erro de chave duplicada
      const existing = await this.connection('usuarios_projeto')
          .where({ id_projeto: projectId, id_usuario: userId, papel_usuario: role })
          .first();
@@ -153,5 +152,34 @@ export class ProjectRepoDb {
             .where({ id_projeto: projectId })
             .select('id', 'item', 'descricao', 'data_importacao')
             .orderBy('id', 'asc'); 
+    }
+
+    async getBacklogItemById(itemId: number): Promise<BacklogItem | null> {
+        const item = await this.connection('backlog_items')
+            .where({ id: itemId })
+            .first(); 
+        
+        return item || null;
+    }
+
+    async updateBacklogItem(itemId: number, data: { item: string; descricao?: string }): Promise<BacklogItem | null> {
+        await this.connection('backlog_items')
+            .where({ id: itemId })
+            .update({
+                item: data.item,
+                descricao: data.descricao
+            });
+        
+        const updatedItem = await this.getBacklogItemById(itemId);
+        
+        return updatedItem || null;
+    }
+
+    async deleteBacklogItem(itemId: number): Promise<boolean> {
+        const deletedRows = await this.connection('backlog_items')
+            .where({ id: itemId })
+            .del();
+        
+        return deletedRows > 0; 
     }
 }
