@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import Input from '../Input/index'; 
 import Button from '../Button/index'; 
+import useAuth from '../../hooks/useAuth';
 import {
     Overlay,
     ModalContainer,
@@ -29,6 +30,7 @@ const ProjectEditModal: React.FC<EditModalProps> = ({ project, onClose, onSucces
   const [descricao, setDescricao] = useState(project.descricao || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,11 +39,18 @@ const ProjectEditModal: React.FC<EditModalProps> = ({ project, onClose, onSucces
 
     const body = { titulo, descricao };
 
+    if (!user) {
+      setError("Usuário não está logado. Faça login novamente.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch(`http://localhost:4000/projeto/${project.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'user-id': user.id
         },
         body: JSON.stringify(body),
       });

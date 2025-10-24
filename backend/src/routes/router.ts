@@ -147,8 +147,9 @@ router.get("/projetos", authMiddleware, (req: Request, res: Response) => listPro
 router.get("/projeto/:id", authMiddleware, (req: Request, res: Response) => getProjectById.execute(req, res));
 
 
-router.put('/projeto/:id', (req: Request, res: Response) => {
-  editProjectController.execute(req, res)});
+router.put('/projeto/:id', authMiddleware,
+    (req: Request, res: Response) => { editProjectController.execute(req, res) }
+);
 
 
 const uploadDir = path.join(__dirname, '..', '..', 'uploads');
