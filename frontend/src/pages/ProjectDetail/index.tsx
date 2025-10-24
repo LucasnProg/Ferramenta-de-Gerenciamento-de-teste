@@ -386,7 +386,7 @@ const handleReorderItem = (itemId: number, direction: 'up' | 'down') => {
            <BacklogTable>
                     <thead>
                         <BacklogTr>
-                            <BacklogTh style={{ width: '7%' }}>ID</BacklogTh>
+                            {/*<BacklogTh style={{ width: '10%', textAlign: 'center' }}>Prioridade</BacklogTh>*/}
                             <BacklogTh style={{ width: '25%' }}>Item</BacklogTh>
                             <BacklogTh style={{ width: '45%' }}>Descrição</BacklogTh>
                             <BacklogTh style={{ width: '10%', textAlign: 'center' }}>Ações</BacklogTh>
@@ -395,7 +395,7 @@ const handleReorderItem = (itemId: number, direction: 'up' | 'down') => {
                     <tbody>
                         {backlogItems.map((item, index) => (
                             <BacklogTr key={item.id}>
-                                <BacklogTd data-label="ID">{index + 1}</BacklogTd>
+                                {/*<BacklogTd data-label="Prioridade">{index + 1}</BacklogTd>*/}
                                 <BacklogTd data-label="Item" title={item.item}>{item.item}</BacklogTd>
                                 <BacklogTd data-label="Descrição" title={item.descricao || ''}>
                                    {item.descricao || '-'}
