@@ -1,13 +1,15 @@
 import styled from 'styled-components';
 
+
 export const PageContainer = styled.main`
   padding: 30px 40px;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  
+ 
 `;
+
 
 export const Header = styled.div`
   display: flex;
@@ -19,10 +21,12 @@ export const Header = styled.div`
   border-bottom: 1px solid #ddd;
 `;
 
+
 export const ProjectTitle = styled.h1`
   font-size: 2rem;
   color: #333;
 `;
+
 
 export const BackButton = styled.button`
   background-color: #6c757d;
@@ -35,16 +39,19 @@ export const BackButton = styled.button`
   cursor: pointer;
   transition: background-color 0.2s;
 
+
   &:hover {
     background-color: #5a6268;
   }
 `;
+
 
 export const TabNav = styled.nav`
   display: flex;
   border-bottom: 1px solid #ddd;
   width: 100%;
 `;
+
 
 export const TabButton = styled.button<{ isActive: boolean }>`
   padding: 15px 30px;
@@ -58,15 +65,18 @@ export const TabButton = styled.button<{ isActive: boolean }>`
   margin-bottom: -1px; /* Alinha a borda com a borda do nav */
   transition: all 0.2s;
 
+
   &:hover {
     color: #0056b3;
   }
 `;
 
+
 export const TabContent = styled.div`
   padding: 30px 5px;
   flex-grow: 1;
 `;
+
 
 export const DescriptionCard = styled.div`
   background-color: #fff;
@@ -76,11 +86,13 @@ export const DescriptionCard = styled.div`
   border: 1px solid #eee;
 `;
 
+
 export const CardTitle = styled.h3`
   font-size: 1.5rem;
   color: #333;
   margin-bottom: 15px;
 `;
+
 
 export const CardText = styled.p`
   font-size: 1.1rem;
@@ -88,27 +100,9 @@ export const CardText = styled.p`
   line-height: 1.7;
 `;
 
-export const EditButton = styled.button`
-  background-color: #6c757d; 
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 5px 12px; 
-  font-size: 0.9rem; 
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  
-  float: right; 
-  margin-top: 20px; 
-  margin-right: 15px;
 
-  &:hover {
-    background-color: #5a6268;
-  }
-`;
-export const DeleteButton = styled.button`
-  background-color: #dc3545; 
+export const EditButton = styled.button`
+  background-color: #6c757d;
   color: white;
   border: none;
   border-radius: 5px;
@@ -117,15 +111,37 @@ export const DeleteButton = styled.button`
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s;
-  
-  float: right; 
-  margin-top: 20px; 
-  margin-right: 10px; 
+ 
+  float: right;
+  margin-top: 20px;
+  margin-right: 15px;
+
+
+  &:hover {
+    background-color: #5a6268;
+  }
+`;
+export const DeleteButton = styled.button`
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 12px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+ 
+  float: right;
+  margin-top: 20px;
+  margin-right: 10px;
+
 
   &:hover {
     background-color: #c82333;
   }
 `;
+
 
 export const ParticipantsTable = styled.table`
   width: 100%;
@@ -137,6 +153,7 @@ export const ParticipantsTable = styled.table`
   overflow: hidden; /* Garante que o border-radius funcione com a tabela */
 `;
 
+
 export const Th = styled.th`
   background-color: #f8f9fa; /* Fundo cinza claro para o cabeçalho */
   padding: 12px 15px;
@@ -146,11 +163,13 @@ export const Th = styled.th`
   border-bottom: 2px solid #dee2e6;
 `;
 
+
 export const Td = styled.td`
   padding: 12px 15px;
   border-bottom: 1px solid #eee; /* Linha separadora entre linhas */
   color: #495057;
 `;
+
 
 export const Tr = styled.tr`
   &:last-child {
@@ -163,6 +182,7 @@ export const Tr = styled.tr`
   }
 `;
 
+
 export const BacklogTable = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -172,6 +192,7 @@ export const BacklogTable = styled.table`
   overflow: hidden; // Garante que os cantos arredondados sejam aplicados
   table-layout: fixed; // Chave para controlar larguras de coluna
 `;
+
 
 export const BacklogTh = styled.th`
   padding: 16px 20px;
@@ -185,18 +206,20 @@ export const BacklogTh = styled.th`
   letter-spacing: 0.5px;
 `;
 
+
 export const BacklogTd = styled.td`
   padding: 16px 20px;
   border-bottom: 1px solid #e9ecef; // Linha suave
   font-size: 14px;
   color: #333; // Cor de texto principal
   vertical-align: middle; // Alinha ícones e texto
-  
+ 
   /* *** A CORREÇÃO PARA O SCROLL ESTÁ AQUI ***
     Isso diz ao CSS para quebrar palavras longas que, de outra forma,
     transbordariam da célula e da tela.
   */
-  word-break: break-word; 
+  word-break: break-word;
+
 
   /* Se preferir truncar o texto com "...", use este bloco em vez de 'word-break':
     max-width: 400px; // Defina uma largura máxima
@@ -206,25 +229,29 @@ export const BacklogTd = styled.td`
   */
 `;
 
+
 export const BacklogTr = styled.tr`
   /* Efeito "Zebra-striping" para legibilidade */
   &:nth-child(even) {
     background-color: #fdfdfd;
   }
-  
+ 
   &:hover {
     background-color: #f5f5f5; // Destaque sutil ao passar o mouse
   }
+
 
   &:last-child ${BacklogTd} {
     border-bottom: none;
   }
 `;
 
+
 export const ActionsTd = styled(BacklogTd)`
   width: 100px; // Largura fixa para a coluna de ações
   text-align: center;
 `;
+
 
 export const IconButton = styled.button`
   background: transparent;
@@ -236,6 +263,7 @@ export const IconButton = styled.button`
   color: #555; // Cor padrão do ícone
   transition: color 0.2s ease-in-out;
 
+
   &:hover {
     /* Cores diferentes para hover */
     &.edit {
@@ -244,8 +272,15 @@ export const IconButton = styled.button`
     &.delete {
       color: #dc3545; // Vermelho para excluir
     }
+    &.down {
+      color: #10a503ff;
+    }
+    &.up {
+      color: #10a503ff;
+    }
   }
 `;
+
 
 export const EmptyStateContainer = styled.div`
   display: flex;
@@ -261,6 +296,7 @@ export const EmptyStateContainer = styled.div`
   text-align: center;
   margin-top: 20px;
 
+
   /* Estilo para o ícone */
   svg {
     font-size: 3rem; /* Ícone grande */
@@ -268,11 +304,13 @@ export const EmptyStateContainer = styled.div`
     opacity: 0.6;
   }
 
+
   h3 {
     font-size: 1.25rem;
     color: #495057; /* Cor do título */
     margin: 0 0 5px 0;
   }
+
 
   p {
     font-size: 1rem;

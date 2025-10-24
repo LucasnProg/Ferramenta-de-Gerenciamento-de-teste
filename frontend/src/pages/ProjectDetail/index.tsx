@@ -5,15 +5,16 @@ import ProjectEditModal from '../../components/ProjectEditModal';
 import AddParticipantModal from '../../components/AddParticipantModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import Button from '../../components/Button';
-import { FaPencilAlt, FaTrash, FaFolderOpen } from 'react-icons/fa';
+import { FaPencilAlt, FaTrash, FaFolderOpen, FaArrowDown, FaArrowUp } from 'react-icons/fa';
 import { BacklogItemEditModal } from '../../components/BacklogItemEditModal';
+import { BacklogItemAddModal } from '../../components/BacklogItemAddModal';
 import {
-    PageContainer, 
-    Header, 
-    ProjectTitle, 
-    BackButton, 
-    TabNav, 
-    TabButton, 
+    PageContainer,
+    Header,
+    ProjectTitle,
+    BackButton,
+    TabNav,
+    TabButton,
     TabContent,
     DescriptionCard,
     CardTitle,
@@ -33,30 +34,34 @@ import {
     EmptyStateContainer
 } from './styles';
 
+
 interface Project {
   id: number;
   titulo: string;
   descricao?: string;
 }
 
-interface Participant { id: string; 
-  name: string; 
-  email: string; 
-  role: string; 
+
+interface Participant { id: string;
+  name: string;
+  email: string;
+  role: string;
 }
 
-interface Project { 
-  id: number; 
-  titulo: string; 
-  descricao?: string; 
-  participantes?: Participant[]; 
+
+interface Project {
+  id: number;
+  titulo: string;
+  descricao?: string;
+  participantes?: Participant[];
 }
 interface BacklogItem {
     id: number;
     item: string;      
-    descricao?: string; 
-    data_importacao: string; 
+    descricao?: string;
+    data_importacao: string;
 }
+
 
 const ProjectDetail: React.FC = () => {
   const { id: projectId } = useParams<{ id: string }>();
@@ -75,6 +80,9 @@ const ProjectDetail: React.FC = () => {
   const [backlogLoading, setBacklogLoading] = useState(false);
   const [backlogError, setBacklogError] = useState('');
   const [editingItem, setEditingItem] = useState<BacklogItem | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+
 
 
   const fetchProject = useCallback(async () => {
@@ -85,9 +93,10 @@ const ProjectDetail: React.FC = () => {
       if (!response.ok) { const d = await response.json(); throw new Error(d.error || 'Erro'); }
       const data = await response.json();
       setProject(data);
-    } catch (err: any) { setError(err.message); } 
+    } catch (err: any) { setError(err.message); }
     finally { setLoading(false); }
   }, [projectId, user]);
+
 
   const fetchBacklog = useCallback(async () => {
         if (!projectId || !user) return;
@@ -110,58 +119,68 @@ const ProjectDetail: React.FC = () => {
         }
     }, [projectId, user]);
 
+
   useEffect(() => { fetchProject(); }, [fetchProject]);
-  
+ 
   useEffect(() => {
         if (activeTab === 'backlog' && backlogItems.length === 0 && !backlogLoading) {
             fetchBacklog();
         }
     }, [activeTab, fetchBacklog, backlogItems.length, backlogLoading]);
 
+
   const handleProjectUpdate = (updatedProjectData: Partial<Project>) => {
     setProject((currentProject:  Project|null) => {
-      if (!currentProject) return null; 
+      if (!currentProject) return null;
       return { ...currentProject, ...updatedProjectData };
     });
     setIsEditModalOpen(false);
   };
+
 
   const handleDeleteClick = () => {
     setModalError(null);
     setIsConfirmModalOpen(true);
   };
 
+
   const handleConfirmDeleteProject = async (email: string, password: string) => {
     if (!project || !user) return;
+
 
     if (user?.email !== email) {
       return setModalError("O e-mail digitado não corresponde ao da sua conta (gerente).");
     }
 
+
     setIsLoadingDelete(true);
     setModalError(null);
+
 
     try {
       const response = await fetch(`http://localhost:4000/projeto/${project.id}`, {
         method: 'DELETE',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'user-id': user.id 
+          'user-id': user.id
         },
         body: JSON.stringify({ email, password })
       });
 
+
       if (response.status === 401 || response.status === 403) {
-        throw new Error("E-mail ou Senha incorreta."); 
+        throw new Error("E-mail ou Senha incorreta.");
       }
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Falha ao excluir o projeto.");
       }
 
+
       alert(`Projeto "${project.titulo}" excluído com sucesso!`);
       setIsConfirmModalOpen(false);
-      navigate('/home'); 
+      navigate('/home');
+
 
       } catch (err: any) {
         setModalError(err.message);
@@ -171,9 +190,12 @@ const ProjectDetail: React.FC = () => {
       }
   };
 
+
   const handleEditBacklogItem = (item: BacklogItem) => {
         setEditingItem(item);
     };
+
+
 
 
   const handleDeleteBacklogItem = async (itemId: number) => {
@@ -181,10 +203,12 @@ const ProjectDetail: React.FC = () => {
             return;
         }
 
+
         if (!user) {
             alert("Erro de autenticação. Por favor, faça login.");
             return;
         }
+
 
         try {
             const response = await fetch(`http://localhost:4000/backlog/${itemId}`, {
@@ -194,19 +218,23 @@ const ProjectDetail: React.FC = () => {
                 }
             });
 
+
             const data = await response.json();
+
 
             if (!response.ok) {
                 throw new Error(data.error || "Falha ao excluir o item.");
             }
 
+
             setBacklogItems(prevItems => prevItems.filter(item => item.id !== itemId));
-            alert(data.message || "Item excluído com sucesso."); 
+            alert(data.message || "Item excluído com sucesso.");
         } catch (err: any) {
             console.error("Erro ao excluir item:", err);
             alert(`Erro: ${err.message}`);
         }
     };
+
 
   const handleItemUpdated = (updatedItem: BacklogItem) => {
         setBacklogItems(prevItems =>
@@ -214,9 +242,63 @@ const ProjectDetail: React.FC = () => {
                 item.id === updatedItem.id ? updatedItem : item
             )
         );
-        setEditingItem(null); 
+        setEditingItem(null);
     };
 
+
+    const handleItemAdded = (newItem: BacklogItem) => {
+        setBacklogItems(prevItems => [newItem, ...prevItems]);
+        setIsAddModalOpen(false);
+    };
+
+
+    const persistNewOrder = async (orderUpdates: { id: number; ordem: number }[]) => {
+    if (!user || !user.id) return;
+    const userIdValue = user.id.toString();
+    try {
+        const response = await fetch(`http://localhost:4000/backlog/reorder`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'user-id': userIdValue
+            },
+            body: JSON.stringify({ orderUpdates })
+        });
+       
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Falha ao salvar a nova ordem.');
+        }
+    } catch (err: any) {
+        console.error("Erro ao persistir ordem:", err);
+    }
+};
+
+
+const handleReorderItem = (itemId: number, direction: 'up' | 'down') => {
+    const currentIndex = backlogItems.findIndex(item => item.id === itemId);
+    if (currentIndex === -1) return;
+
+
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+   
+    if (newIndex < 0 || newIndex >= backlogItems.length) return;
+
+
+    const newItems = Array.from(backlogItems);
+    [newItems[currentIndex], newItems[newIndex]] = [newItems[newIndex], newItems[currentIndex]];
+   
+    setBacklogItems(newItems);
+
+
+    const orderUpdates = newItems.map((item, index) => ({
+        id: Number(item.id),
+        ordem: index + 1
+    }));
+
+
+    persistNewOrder(orderUpdates);
+};
   const renderTabContent = () => {
     if (!project) return null;
     const manager = project.participantes?.find((p: Participant) => p.role.toLowerCase() === 'gerente');
@@ -268,21 +350,40 @@ const ProjectDetail: React.FC = () => {
           </div>
         );
       case 'backlog':
-        if (backlogLoading){
-          return (
-            <EmptyStateContainer>
-                <FaFolderOpen />
-                <h3>Nenhum Item no Backlog</h3>
-                <p>Este projeto ainda não possui itens de backlog importados, ou estão sendo carregados.</p>
-            </EmptyStateContainer>
-        );
-        };
-        if (backlogError) return <p style={{ color: 'red' }}>Erro ao carregar backlog: {backlogError}</p>;
-        if (backlogItems.length === 0) return <p>Nenhum item de backlog importado para este projeto.</p>;
-
-        return (
-            <div>
-                <BacklogTable>
+        const backlogControls = (
+        <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '15px' }}>
+            <Button
+                onClick={() => setIsAddModalOpen(true)} style={{ marginBottom: '20px', width: 'auto', backgroundColor:'#207733ff' }}
+            >
+                + Adicionar Item
+            </Button>
+        </div>
+    );
+   
+    if (backlogLoading) {
+     return (
+       <>
+         {backlogControls}
+         <p>Itens ainda não carregados</p>
+       </>
+     );
+    };
+   
+    if (backlogError) return <p style={{ color: 'red' }}>Erro ao carregar backlog: {backlogError}</p>;
+   
+    if (backlogItems.length === 0) {
+       return (
+         <>
+            {backlogControls}
+            <p>Nenhum item de backlog encontrado. Use o botão acima para adicionar um item.</p>
+         </>
+       );
+    }
+   
+    return (
+        <div>
+           {backlogControls}
+           <BacklogTable>
                     <thead>
                         <BacklogTr>
                             <BacklogTh style={{ width: '7%' }}>ID</BacklogTh>
@@ -297,16 +398,26 @@ const ProjectDetail: React.FC = () => {
                                 <BacklogTd data-label="ID">{index + 1}</BacklogTd>
                                 <BacklogTd data-label="Item" title={item.item}>{item.item}</BacklogTd>
                                 <BacklogTd data-label="Descrição" title={item.descricao || ''}>
-                                    {item.descricao || '–'}
+                                   {item.descricao || '-'}
                                 </BacklogTd>
                                 <ActionsTd>
+                                      {index > 0 && (
+                                        <IconButton className="down" title="Mover para cima" onClick={() => handleReorderItem(item.id, 'up')}>
+                                          <FaArrowUp />
+                                        </IconButton>
+                                        )}
+                                        {index < backlogItems.length - 1 && (
+                                        <IconButton className="up" title="Mover para baixo" onClick={() => handleReorderItem(item.id, 'down')}>
+                                          <FaArrowDown />
+                                        </IconButton>
+                                        )}
                                     <IconButton
                                         className="edit"
                                         title="Editar Item"
                                         onClick={() => handleEditBacklogItem(item)}>
                                         <FaPencilAlt />
                                     </IconButton>
-                                    <IconButton 
+                                    <IconButton
                                         className="delete"
                                         title="Excluir Item"
                                         onClick={() => handleDeleteBacklogItem(item.id)}>
@@ -318,13 +429,14 @@ const ProjectDetail: React.FC = () => {
                     </tbody>
                 </BacklogTable>
             </div>
-        );
+    );
       case 'ciclo-teste':
         return <div>Aqui ficarão os Ciclos de Teste.</div>;
       default:
         return null;
     }
   };
+
 
   if (loading) {
     return <PageContainer><p>Carregando projeto...</p></PageContainer>;
@@ -333,12 +445,12 @@ const ProjectDetail: React.FC = () => {
     return <PageContainer><p style={{ color: 'red' }}>Erro: {error}</p></PageContainer>;
   }
   if (!project) return <p>Projeto não encontrado.</p>;
-  
+ 
   return (
     <>
       <PageContainer>
         {isEditModalOpen && project && (
-          <ProjectEditModal 
+          <ProjectEditModal
             project={project}
             onClose={() => setIsEditModalOpen(false)}
             onSuccess={handleProjectUpdate}
@@ -351,17 +463,27 @@ const ProjectDetail: React.FC = () => {
                         onItemUpdated={handleItemUpdated}
                     />
                 )}
+
+
+                {isAddModalOpen && project && (
+                <BacklogItemAddModal
+                    projectId={project.id}
+                    onClose={() => setIsAddModalOpen(false)}
+                    onItemAdded={handleItemAdded}
+                />
+            )}
         <Header>
           <ProjectTitle>{project ? project.titulo : 'Projeto'}</ProjectTitle>
           <BackButton onClick={() => navigate('/home')}>Voltar</BackButton>
         </Header>
 
+
         <TabNav>
           <TabButton isActive={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')}>
             Dashboard
           </TabButton>
-          <TabButton isActive={activeTab === 'participantes'} onClick={() => setActiveTab('participantes')}> 
-            Participantes 
+          <TabButton isActive={activeTab === 'participantes'} onClick={() => setActiveTab('participantes')}>
+            Participantes
           </TabButton>
           <TabButton isActive={activeTab === 'backlog'} onClick={() => setActiveTab('backlog')}>
             Backlog
@@ -370,6 +492,7 @@ const ProjectDetail: React.FC = () => {
             Ciclo de teste
           </TabButton>
         </TabNav>
+
 
         <TabContent>
           {renderTabContent()}
@@ -397,5 +520,6 @@ const ProjectDetail: React.FC = () => {
     </>
   );
 };
+
 
 export default ProjectDetail;
