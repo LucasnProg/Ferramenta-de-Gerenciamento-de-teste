@@ -12,13 +12,19 @@ export class AddParticipant {
         const projectId = parseInt(req.params.id);
         const { email, role } = req.body;
         const requestingUser = req.user;
+        
+        if (isNaN(projectId)) {
+             return res.status(400).json({ error: "ID de projeto inválido." });
+        }
 
         if (!email || !role) {
             return res.status(400).json({ error: "Email e Cargo são obrigatórios." });
         }
+
         if (isNaN(projectId)) {
              return res.status(400).json({ error: "ID de projeto inválido." });
         }
+
         if (!requestingUser) {
              return res.status(401).json({ error: "Usuário não autenticado." });
         }
@@ -28,6 +34,10 @@ export class AddParticipant {
             const project = await this.projectRepository.findById(projectId);
             if (!project) {
                 return res.status(404).json({ error: "Projeto não encontrado." });
+            }
+            if (project.getId() !== projectId) {
+                console.error(`[VERIFICAÇÃO FALHOU] ID da URL (${projectId}) diferente do ID do projeto encontrado (${project.getId()}).`);
+                throw new Error("Falha na verificação interna do ID do projeto."); // Lança um erro interno genérico
             }
             const participants = project.getParticipantes();
             const manager = participants.find(p => p.role.toLowerCase() === 'gerente');
