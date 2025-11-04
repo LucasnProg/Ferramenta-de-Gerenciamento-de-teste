@@ -42,3 +42,22 @@ CREATE TABLE IF NOT EXISTS usuarios_projeto (
     CONSTRAINT projeto_fk FOREIGN KEY (id_projeto) REFERENCES projetos(id) ON DELETE CASCADE ON UPDATE CASCADE, 
     CONSTRAINT usuario_fk FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE ON UPDATE CASCADE
 )
+
+-- Tabela para os Ciclos de Teste
+CREATE TABLE IF NOT EXISTS ciclos_de_teste (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id_projeto INTEGER NOT NULL,
+    titulo VARCHAR(100) NOT NULL,
+    descricao TEXT NULL,
+    data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT ciclo_projeto_fk FOREIGN KEY (id_projeto) REFERENCES projetos(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- Tabela de ligação (Muitos-para-Muitos) entre Ciclos e Itens do Backlog
+CREATE TABLE IF NOT EXISTS ciclo_backlog_items (
+    id_ciclo INTEGER NOT NULL,
+    id_item_backlog INTEGER NOT NULL,
+    PRIMARY KEY (id_ciclo, id_item_backlog),
+    CONSTRAINT ciclo_fk FOREIGN KEY (id_ciclo) REFERENCES ciclos_de_teste(id) ON DELETE CASCADE,
+    CONSTRAINT item_backlog_fk FOREIGN KEY (id_item_backlog) REFERENCES backlog_items(id) ON DELETE CASCADE
+);

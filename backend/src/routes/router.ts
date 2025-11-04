@@ -25,6 +25,9 @@ import { EditBacklogItemController } from "../controller/EditBackLogController";
 import { DeleteBacklogItemController } from "../controller/DeleteBacklogItemController";
 import { AddBacklogItemController } from "../controller/AddBacklogItemController";
 import { ReorderBacklogController } from "../controller/ReorderBacklogController";
+import { CreateCicloDeTesteController } from "../controller/CreateCicloDeTesteController";
+import { ListCiclosByProjectController } from "../controller/ListCiclosByProjectController";
+import { GetCicloDeTesteByIdController } from "../controller/GetCicloDeTesteByIdController";
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -57,6 +60,9 @@ const editBacklogItemController = new EditBacklogItemController(projectRepo);
 const deleteBacklogItemController = new DeleteBacklogItemController(projectRepo);
 const addBacklogItemController = new AddBacklogItemController(projectRepo);
 const reorderBacklogController = new ReorderBacklogController(projectRepo);
+const createCicloDeTesteController = new CreateCicloDeTesteController(projectRepo);
+const listCiclosByProjectController = new ListCiclosByProjectController(projectRepo);
+const getCicloDeTesteByIdController = new GetCicloDeTesteByIdController(projectRepo);
 
 
 // Listar usuários
@@ -222,6 +228,23 @@ router.put(
     (req: Request, res: Response) => reorderBacklogController.execute(req, res)
 );
 
+router.post(
+    "/projeto/:id/ciclo-teste",
+    authMiddleware,
+    (req: Request, res: Response) => createCicloDeTesteController.execute(req, res)
+);
+
+router.get(
+    "/projeto/:id/ciclo-teste",
+    authMiddleware,
+    (req: Request, res: Response) => listCiclosByProjectController.execute(req, res)
+);
+
+router.get(
+    "/ciclo-teste/:id",
+    authMiddleware,
+    (req: Request, res: Response) => getCicloDeTesteByIdController.execute(req, res)
+);
 
 export { router };
 

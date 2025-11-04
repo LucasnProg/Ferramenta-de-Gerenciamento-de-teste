@@ -2,6 +2,7 @@ import { Knex } from "knex";
 import { Projeto, Participant } from "../../../model/Projeto";;
 import { db } from "./knex";
 import { BacklogItem, NewBacklogItem } from "../../../model/BacklogItem";
+import { CicloDeTeste, NewCicloDeTeste } from "../../../model/CicloDeTeste";
 
 
 export class ProjectRepoDb {
@@ -257,5 +258,64 @@ export class ProjectRepoDb {
             console.error("Erro ao atualizar ordem do backlog:", err);
             throw new Error("Falha ao salvar a nova ordem do backlog.");
         }
+    }
+
+    async createCicloDeTeste(novoCiclo: NewCicloDeTeste): Promise<CicloDeTeste> {
+        const trx = await this.connection.transaction();
+        try {
+            // 1. Insere o ciclo na tabela principal
+            const [insertedId] = await trx('ciclos_de_teste').insert({
+                id_projeto: novoCiclo.id_projeto,
+                titulo: novoCiclo.titulo,
+                descricao: novoCiclo.descricao
+            });
+
+        // 2. Prepara os dados de ligação (Ciclo <-> Itens do Backlog)
+        if (novoCiclo.itemIds && novoCiclo.itemIds.length > 0) {
+            const links = novoCiclo.itemIds.map(itemId => ({
+                id_ciclo: insertedId,
+                id_item_backlog: itemId
+            }));
+            // 3. Insere as ligações na tabela 'ciclo_backlog_items'
+            await trx('ciclo_backlog_items').insert(links);
+        }
+
+        await trx.commit();
+
+        // Retorna o ciclo recém-criado (sem os itens, para economizar)
+        const cicloSalvo = await this.connection('ciclos_de_teste').where({ id: insertedId }).first();
+        return cicloSalvo;
+
+        } catch (err) {
+            await trx.rollback();
+            console.error("Erro ao criar ciclo de teste:", err);
+            throw new Error("Falha ao salvar o ciclo de teste no banco de dados.");
+        }
+    }
+
+      // Lista os ciclos de um projeto (versão simples, para a aba)
+    async listCiclosByProjectId(projectId: number): Promise<Pick<CicloDeTeste, 'id' | 'titulo' | 'descricao'>[]> {
+        return this.connection('ciclos_de_teste')
+            .where({ id_projeto: projectId })
+            .select('id', 'titulo', 'descricao')
+            .orderBy('data_criacao', 'desc');
+    }
+
+    // Busca um ciclo de teste completo, com todos os seus itens de backlog
+    async findCicloById(cicloId: number): Promise<CicloDeTeste | null> {
+        const ciclo = await this.connection('ciclos_de_teste')
+            .where({ id: cicloId })
+            .first();
+
+        if (!ciclo) return null;
+
+        // Busca os itens de backlog associados
+        const itens = await this.connection('backlog_items as bi')
+            .join('ciclo_backlog_items as cbi', 'bi.id', 'cbi.id_item_backlog')
+            .where('cbi.id_ciclo', cicloId)
+            .select('bi.id', 'bi.item', 'bi.descricao', 'bi.data_importacao');
+
+        ciclo.itens_backlog = itens;
+        return ciclo;
     }
 }
