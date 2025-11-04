@@ -11,6 +11,8 @@ import DeleteUser from '../pages/DeleteUser';
 import ProjectDetail from "../pages/ProjectDetail";
 import EditProjectPage from '../pages/EditProjectPage';
 import ForgotPass from "../pages/ForgotPass";
+import CreateTestCyclePage from "../pages/CreateTestCyclePage";
+import TestCycleDetail from "../pages/TestCycleDetail";
 
 const Private: FC<{ children: React.ReactElement }> = ({ children }) => {
     const { signed } = useAuth();
@@ -31,6 +33,8 @@ const RoutesApp: FC = () => {
                     <Route path="delete-user" element={<DeleteUser />} />
                     <Route path="projeto/:id" element={<ProjectDetail />} />
                     <Route path="projeto/editar/:id" element={<EditProjectPage />} />
+                    <Route path="projeto/:id/novo-ciclo" element={<CreateTestCyclePage />} />
+                    <Route path="ciclo-teste/:cicloId" element={<TestCycleDetail />} />
                 </Route>
 
                 <Route path="*" element={<Login />} />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import ProjectEditModal from '../../components/ProjectEditModal';
 import AddParticipantModal from '../../components/AddParticipantModal';
@@ -55,6 +55,7 @@ interface Project {
   descricao?: string;
   participantes?: Participant[];
 }
+
 interface BacklogItem {
     id: number;
     item: string;      
@@ -62,16 +63,22 @@ interface BacklogItem {
     data_importacao: string;
 }
 
+interface CicloListItem {
+  id: number;
+  titulo: string;
+  descricao?: string;
+}
+
 
 const ProjectDetail: React.FC = () => {
   const { id: projectId } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showAddModal, setShowAddModal] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('dashboard');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
@@ -81,6 +88,10 @@ const ProjectDetail: React.FC = () => {
   const [backlogError, setBacklogError] = useState('');
   const [editingItem, setEditingItem] = useState<BacklogItem | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [ciclos, setCiclos] = useState<CicloListItem[]>([]);
+  const [loadingCiclos, setLoadingCiclos] = useState(false);
+  const defaultTab = location.state?.defaultTab || 'dashboard'; 
+  const [activeTab, setActiveTab] = useState(defaultTab);
 
 
 
@@ -99,36 +110,60 @@ const ProjectDetail: React.FC = () => {
 
 
   const fetchBacklog = useCallback(async () => {
-        if (!projectId || !user) return;
-        setBacklogLoading(true);
-        setBacklogError('');
-        try {
-            const response = await fetch(`http://localhost:4000/projeto/${projectId}/backlog`, {
-                headers: { 'user-id': user.id }
-            });
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.error || 'Erro ao buscar backlog.');
-            }
-            const data: BacklogItem[] = await response.json();
-            setBacklogItems(data);
-        } catch (err: any) {
-            setBacklogError(err.message);
-        } finally {
-            setBacklogLoading(false);
+    if (!projectId || !user) return;
+    setBacklogLoading(true);
+    setBacklogError('');
+    try {
+        const response = await fetch(`http://localhost:4000/projeto/${projectId}/backlog`, {
+            headers: { 'user-id': user.id }
+        });
+        if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.error || 'Erro ao buscar backlog.');
         }
-    }, [projectId, user]);
+        const data: BacklogItem[] = await response.json();
+        setBacklogItems(data);
+    } catch (err: any) {
+        setBacklogError(err.message);
+    } finally {
+        setBacklogLoading(false);
+    }
+  }, [projectId, user]);
 
 
   useEffect(() => { fetchProject(); }, [fetchProject]);
  
   useEffect(() => {
-        if (activeTab === 'backlog' && backlogItems.length === 0 && !backlogLoading) {
-            fetchBacklog();
-        }
-    }, [activeTab, fetchBacklog, backlogItems.length, backlogLoading]);
+    if (activeTab === 'backlog' && backlogItems.length === 0 && !backlogLoading) {
+        fetchBacklog();
+    }
+  }, [activeTab, fetchBacklog, backlogItems.length, backlogLoading]);
 
 
+  const fetchCiclos = useCallback(async () => {
+    if (!projectId || !user) return;
+    setLoadingCiclos(true);
+    try {
+      const response = await fetch(`http://localhost:4000/projeto/${projectId}/ciclo-teste`, {
+        headers: { 'user-id': user.id }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCiclos(data);
+      }
+    } catch (err) {
+      console.error("Falha ao buscar ciclos", err);
+    } finally {
+      setLoadingCiclos(false);
+    }
+  }, [projectId, user]);
+
+  useEffect(() => {
+    if (activeTab === 'ciclo-teste') {
+      fetchCiclos();
+    }
+  }, [activeTab, fetchCiclos]);
+  
   const handleProjectUpdate = (updatedProjectData: Partial<Project>) => {
     setProject((currentProject:  Project|null) => {
       if (!currentProject) return null;
@@ -358,7 +393,7 @@ const handleReorderItem = (itemId: number, direction: 'up' | 'down') => {
                 + Adicionar Item
             </Button>
         </div>
-    );
+        );
    
     if (backlogLoading) {
      return (
@@ -431,7 +466,35 @@ const handleReorderItem = (itemId: number, direction: 'up' | 'down') => {
             </div>
     );
       case 'ciclo-teste':
-        return <div>Aqui ficarão os Ciclos de Teste.</div>;
+        return (
+          <div>
+            <Button 
+              onClick={() => navigate(`/home/projeto/${projectId}/novo-ciclo`, { state: { fromProject: projectId } })} 
+              style={{ marginBottom: '20px', width: 'auto', backgroundColor: '#28a745' }}
+            >
+              + Criar novo ciclo de teste
+            </Button>
+
+            {loadingCiclos && <p>Carregando ciclos...</p>}
+
+            {!loadingCiclos && ciclos.length === 0 && (
+              <p>Nenhum ciclo de teste criado para este projeto.</p>
+            )}
+
+            {!loadingCiclos && ciclos.length > 0 && (
+              <div>
+                {ciclos.map(ciclo => (
+                  <Link key={ciclo.id} to={`/home/ciclo-teste/${ciclo.id}`} style={{ textDecoration: 'none' }}>
+                    <div style={{ background: '#fff', border: '1px solid #ddd', padding: '15px', borderRadius: '5px', marginBottom: '10px' }}>
+                      <h4 style={{ margin: 0 }}>{ciclo.titulo}</h4>
+                      <p style={{ fontSize: '0.9rem', color: '#555' }}>{ciclo.descricao || 'Sem descrição.'}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        );
       default:
         return null;
     }

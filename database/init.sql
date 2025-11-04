@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS usuarios_projeto (
     PRIMARY KEY (id_projeto, id_usuario, papel_usuario),
     CONSTRAINT projeto_fk FOREIGN KEY (id_projeto) REFERENCES projetos(id) ON DELETE CASCADE ON UPDATE CASCADE, 
     CONSTRAINT usuario_fk FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE ON UPDATE CASCADE
-)
+);
 
 -- Tabela para os Ciclos de Teste
 CREATE TABLE IF NOT EXISTS ciclos_de_teste (
