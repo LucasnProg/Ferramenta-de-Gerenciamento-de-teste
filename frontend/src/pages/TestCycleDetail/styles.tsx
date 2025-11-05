@@ -47,3 +47,46 @@ export const CardTitle = styled.h3`
 export const CardText = styled.p`
   font-size: 1.1rem; color: #555; line-height: 1.7;
 `;
+export const BacklogTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+  table-layout: fixed;
+`;
+
+export const BacklogTh = styled.th`
+  padding: 16px 20px;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+export const BacklogTd = styled.td`
+ padding: 16px 20px;
+ border-bottom: 1px solid #e9ecef;
+ font-size: 14px;
+ color: #333;
+ vertical-align: top;
+ word-break: break-word;
+`;
+
+export const BacklogTr = styled.tr`
+ &:nth-child(even) {
+  background-color: #fdfdfd;
+ }
+
+ &:hover {
+  background-color: #f5f5f5;
+ }
+
+ &:last-child ${BacklogTd} {   border-bottom: none;
+ }
+`;

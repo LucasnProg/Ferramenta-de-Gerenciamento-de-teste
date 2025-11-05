@@ -2,11 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import {
-    PageContainer, Header, Title, BackButton, Content,
-    StartButton, SectionTitle, ItemList, Item, DescriptionCard, CardText, CardTitle
+  PageContainer,
+  Header,
+  Title,
+  BackButton,
+  Content,
+  StartButton,
+  SectionTitle,
+  DescriptionCard,
+  CardTitle,
+  CardText,
+  BacklogTable,
+  BacklogTh,
+  BacklogTd,
+  BacklogTr
 } from './styles';
 
-interface BacklogItem { id: number; item: string; }
+interface BacklogItem { id: number; item: string; descricao?: string; }
 interface Ciclo {
   id: number;
   titulo: string;
@@ -73,11 +85,29 @@ const TestCycleDetail: React.FC = () => {
         </DescriptionCard>
 
         <SectionTitle>Itens de Backlog Incluídos</SectionTitle>
-        <ItemList>
-          {ciclo.itens_backlog?.map(item => (
-            <Item key={item.id}>{item.item}</Item>
-          ))}
-        </ItemList>
+        <BacklogTable>
++         <thead>
++           <BacklogTr>
++             <BacklogTh style={{ width: '40%' }}>Item</BacklogTh>
++             <BacklogTh style={{ width: '60%' }}>Descrição</BacklogTh>
++           </BacklogTr>
++         </thead>
++         <tbody>
++           {ciclo.itens_backlog?.map(item => (
++             <BacklogTr key={item.id}>
++               <BacklogTd>{item.item}</BacklogTd>
++               <BacklogTd>{item.descricao || '-'}</BacklogTd>
++             </BacklogTr>
++           ))}
++           {(ciclo.itens_backlog?.length === 0) && (
++             <BacklogTr>
++               <BacklogTd colSpan={2} style={{ textAlign: 'center' }}>
++                 Nenhum item de backlog foi incluído neste ciclo.
++               </BacklogTd>
++             </BacklogTr>
++           )}
++         </tbody>
++       </BacklogTable>
       </Content>
     </PageContainer>
   );
