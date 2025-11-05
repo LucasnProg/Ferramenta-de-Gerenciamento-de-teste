@@ -89,4 +89,35 @@ export const BacklogTr = styled.tr`
 
  &:last-child ${BacklogTd} {   border-bottom: none;
  }
+ `;
+
+export const HeaderActions = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
+export const EditButton = styled.button`
+  background-color: #6c757d; // Cinza
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  &:hover { background-color: #5a6268; }
+`;
+
+export const DeleteButton = styled.button`
+  background-color: #dc3545; // Vermelho
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  &:hover { background-color: #c82333; }
 `;
