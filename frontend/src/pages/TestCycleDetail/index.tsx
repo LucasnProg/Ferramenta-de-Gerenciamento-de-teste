@@ -18,7 +18,7 @@ import {
   BacklogTr
 } from './styles';
 
-interface BacklogItem { id: number; item: string; descricao?: string; }
+interface BacklogItem { id: number; item: string; }
 interface Ciclo {
   id: number;
   titulo: string;
@@ -80,34 +80,34 @@ const TestCycleDetail: React.FC = () => {
       </Header>
       <Content>
         <DescriptionCard>
-          <CardTitle>Descrição do Ciclo</CardTitle>
+          <CardTitle>Descrição</CardTitle>
           <CardText>{ciclo.descricao || "Este ciclo não possui descrição."}</CardText>
         </DescriptionCard>
 
-        <SectionTitle>Itens de Backlog Incluídos</SectionTitle>
+        <SectionTitle>Itens de Backlog</SectionTitle>
         <BacklogTable>
-+         <thead>
-+           <BacklogTr>
-+             <BacklogTh style={{ width: '40%' }}>Item</BacklogTh>
-+             <BacklogTh style={{ width: '60%' }}>Descrição</BacklogTh>
-+           </BacklogTr>
-+         </thead>
-+         <tbody>
-+           {ciclo.itens_backlog?.map(item => (
-+             <BacklogTr key={item.id}>
-+               <BacklogTd>{item.item}</BacklogTd>
-+               <BacklogTd>{item.descricao || '-'}</BacklogTd>
-+             </BacklogTr>
-+           ))}
-+           {(ciclo.itens_backlog?.length === 0) && (
-+             <BacklogTr>
-+               <BacklogTd colSpan={2} style={{ textAlign: 'center' }}>
-+                 Nenhum item de backlog foi incluído neste ciclo.
-+               </BacklogTd>
-+             </BacklogTr>
-+           )}
-+         </tbody>
-+       </BacklogTable>
+          <thead>
+            <BacklogTr>
+              <BacklogTh style={{ width: '80%' }}>Item</BacklogTh>
+              <BacklogTh style={{ width: '20%' }}></BacklogTh>
+            </BacklogTr>
+          </thead>
+          <tbody>
+            {ciclo.itens_backlog?.map(item => (
+              <BacklogTr key={item.id}>
+                <BacklogTd>{item.item}</BacklogTd>
+                <BacklogTd>{/*Rufino Deve adicionar o checkbox de seleção de item para inciar uma suite de testes.*/}</BacklogTd>
+              </BacklogTr>
+            ))}
+            {(ciclo.itens_backlog?.length === 0) && (
+              <BacklogTr>
+                <BacklogTd colSpan={2} style={{ textAlign: 'center' }}>
+                  Nenhum item de backlog foi incluído neste ciclo.
+                </BacklogTd>
+              </BacklogTr>
+            )}
+          </tbody>
+        </BacklogTable>
       </Content>
     </PageContainer>
   );

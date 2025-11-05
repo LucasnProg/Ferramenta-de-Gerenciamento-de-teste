@@ -552,7 +552,7 @@ const handleReorderItem = (itemId: number, direction: 'up' | 'down') => {
             Backlog
           </TabButton>
           <TabButton isActive={activeTab === 'ciclo-teste'} onClick={() => setActiveTab('ciclo-teste')}>
-            Ciclo de teste
+            Ciclos de teste
           </TabButton>
         </TabNav>
 
