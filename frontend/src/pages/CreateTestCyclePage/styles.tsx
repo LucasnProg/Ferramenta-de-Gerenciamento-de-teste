@@ -11,12 +11,14 @@ export const Form = styled.form`
   max-width: 800px;
 `;
 export const Label = styled.label`
+  display: block;
   font-weight: bold; color: #555; margin-bottom: 5px;
 `;
 export const StyledTextarea = styled.textarea`
   padding: 10px 15px; border-radius: 5px; font-size: 16px;
   background-color: #f0f2f5; border: 1px solid #ccc;
-  min-height: 100px; resize: vertical; font-family: inherit;
+  height: 150px; width:100%;
+  min-height: 100px; resize: none; font-family: inherit;
 `;
 export const BacklogListContainer = styled.div`
   border: 1px solid #ddd; border-radius: 8px;

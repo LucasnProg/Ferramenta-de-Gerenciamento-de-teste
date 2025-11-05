@@ -7,7 +7,7 @@ export class CreateProject {
 
   async execute(req: Request, res: Response) {
     const { titulo, descricao } = req.body;
-    const user = req.user; // Obtém o usuário do middleware de autenticação
+    const user = req.user; 
 
     if (!titulo) {
       return res.status(400).json({ error: "Título é obrigatório" });

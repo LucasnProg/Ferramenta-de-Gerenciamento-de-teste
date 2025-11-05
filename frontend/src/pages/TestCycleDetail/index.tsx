@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import {
     PageContainer, Header, Title, BackButton, Content,
-    StartButton, SectionTitle, ItemList, Item
+    StartButton, SectionTitle, ItemList, Item, DescriptionCard, CardText, CardTitle
 } from './styles';
 
 interface BacklogItem { id: number; item: string; }

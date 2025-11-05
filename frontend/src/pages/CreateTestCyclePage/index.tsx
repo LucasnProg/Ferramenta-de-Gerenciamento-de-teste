@@ -5,7 +5,7 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import {
     PageContainer, Title, Form, Label, StyledTextarea,
-    BacklogListContainer, BacklogItem, Checkbox, ButtonGroup, ErrorText
+    BacklogListContainer, BacklogItem, Checkbox, ButtonGroup, ErrorText, Header, BackButton
 } from './styles';
 
 interface BacklogItem {
@@ -112,8 +112,8 @@ const CreateTestCyclePage: React.FC = () => {
         <div>
           <Label htmlFor="titulo">Título do Ciclo</Label>
           <Input
-            id="titulo" type="text"
-            placeholder="Ex: Teste de Regressão v1.2"
+            type="text"
+            placeholder="Ex: Teste de Funcional - Login"
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
           />
@@ -128,7 +128,7 @@ const CreateTestCyclePage: React.FC = () => {
           />
         </div>
         <div>
-          <Label>Itens do Backlog para Testar</Label>
+          <Label>Selecione os itens do backlog</Label>
           <BacklogListContainer>
             {backlogItems.length === 0 && <p style={{ padding: '15px' }}>Carregando itens ou backlog vazio...</p>}
             {backlogItems.map(item => (
