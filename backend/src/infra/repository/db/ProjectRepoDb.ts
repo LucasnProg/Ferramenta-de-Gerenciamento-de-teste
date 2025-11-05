@@ -318,4 +318,45 @@ export class ProjectRepoDb {
         ciclo.itens_backlog = itens;
         return ciclo;
     }
+
+    async updateCicloDeTeste(cicloId: number, data: { titulo: string, descricao?: string, itemIds: number[] }): Promise<void> {
+        const trx = await this.connection.transaction();
+        try {
+            await trx('ciclos_de_teste')
+                .where({ id: cicloId })
+                .update({
+                    titulo: data.titulo,
+                    descricao: data.descricao
+                });
+
+            await trx('ciclo_backlog_items')
+                .where({ id_ciclo: cicloId })
+                .del();
+
+            if (data.itemIds && data.itemIds.length > 0) {
+                const links = data.itemIds.map(itemId => ({
+                    id_ciclo: cicloId,
+                    id_item_backlog: itemId
+                }));
+                await trx('ciclo_backlog_items').insert(links);
+            }
+
+            await trx.commit();
+        } catch (err) {
+            await trx.rollback();
+            console.error("Erro ao atualizar ciclo de teste:", err);
+            throw new Error("Falha ao atualizar o ciclo de teste no banco de dados.");
+        }
+    }
+
+    async deleteCicloDeTeste(cicloId: number): Promise<void> {
+        try {
+            await this.connection('ciclos_de_teste')
+                .where({ id: cicloId })
+                .del();
+        } catch (err) {
+            console.error("Erro ao deletar ciclo de teste:", err);
+            throw new Error("Falha ao deletar o ciclo de teste.");
+        }
+    }
 }

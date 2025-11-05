@@ -28,6 +28,8 @@ import { ReorderBacklogController } from "../controller/ReorderBacklogController
 import { CreateCicloDeTesteController } from "../controller/CreateCicloDeTesteController";
 import { ListCiclosByProjectController } from "../controller/ListCiclosByProjectController";
 import { GetCicloDeTesteByIdController } from "../controller/GetCicloDeTesteByIdController";
+import { EditCicloDeTesteController } from "../controller/EditCicloDeTesteController";
+import { DeleteCicloDeTesteController } from "../controller/DeleteCicloDeTesteController";
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -63,6 +65,8 @@ const reorderBacklogController = new ReorderBacklogController(projectRepo);
 const createCicloDeTesteController = new CreateCicloDeTesteController(projectRepo);
 const listCiclosByProjectController = new ListCiclosByProjectController(projectRepo);
 const getCicloDeTesteByIdController = new GetCicloDeTesteByIdController(projectRepo);
+const editCicloDeTesteController = new EditCicloDeTesteController(projectRepo);
+const deleteCicloDeTesteController = new DeleteCicloDeTesteController(projectRepo);
 
 
 // Listar usuários
@@ -244,6 +248,18 @@ router.get(
     "/ciclo-teste/:id",
     authMiddleware,
     (req: Request, res: Response) => getCicloDeTesteByIdController.execute(req, res)
+);
+
+router.put(
+    "/ciclo-teste/:id",
+    authMiddleware,
+    (req: Request, res: Response) => editCicloDeTesteController.execute(req, res)
+);
+
+router.delete(
+    "/ciclo-teste/:id",
+    authMiddleware,
+    (req: Request, res: Response) => deleteCicloDeTesteController.execute(req, res)
 );
 
 export { router };
