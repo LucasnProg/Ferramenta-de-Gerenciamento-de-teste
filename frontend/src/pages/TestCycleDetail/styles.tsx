@@ -97,7 +97,7 @@ export const HeaderActions = styled.div`
 `;
 
 export const EditButton = styled.button`
-  background-color: #6c757d; // Cinza
+  background-color: #31703fff; 
   color: white;
   border: none;
   border-radius: 5px;

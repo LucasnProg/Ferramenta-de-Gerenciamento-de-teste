@@ -17,7 +17,7 @@ interface CicloDeTeste {
     id_projeto: number;
     titulo: string;
     descricao?: string;
-    itens_backlog: BacklogItem[];
+    itens_backlog?: BacklogItem[];
 }
 interface Props {
     ciclo: CicloDeTeste;
@@ -31,7 +31,7 @@ export const TestCycleEditModal: React.FC<Props> = ({ ciclo, onClose, onSuccess 
     const [descricao, setDescricao] = useState(ciclo.descricao || '');
     const [allBacklogItems, setAllBacklogItems] = useState<BacklogItem[]>([]);
     const [selectedItems, setSelectedItems] = useState<number[]>(() => 
-        ciclo.itens_backlog.map(item => item.id)
+        ciclo.itens_backlog?.map(item => item.id) ?? [] 
     );
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -112,7 +112,8 @@ export const TestCycleEditModal: React.FC<Props> = ({ ciclo, onClose, onSuccess 
                     <div>
                         <Label htmlFor="titulo">Título do Ciclo</Label>
                         <Input
-                            id="titulo" type="text"
+                            type="text"
+                            placeholder=""
                             value={titulo}
                             onChange={(e) => setTitulo(e.target.value)}
                         />
@@ -145,7 +146,7 @@ export const TestCycleEditModal: React.FC<Props> = ({ ciclo, onClose, onSuccess 
                     {error && <ErrorText>{error}</ErrorText>}
 
                     <ButtonGroup>
-                        <Button type="button" onClick={onClose} styleType="secondary">
+                        <Button type="button" onClick={onClose}>
                             Cancelar
                         </Button>
                         <Button type="submit" disabled={loading} style={{ backgroundColor: '#007bff' }}>

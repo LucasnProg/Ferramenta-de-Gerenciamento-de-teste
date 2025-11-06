@@ -43,7 +43,7 @@ interface Participant {
 }
 
 const TestCycleDetail: React.FC = () => {
-    const { id: cicloId } = useParams<{ id: string }>(); 
+    const { cicloId } = useParams<{ cicloId: string }>();
     const { user } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
@@ -61,6 +61,7 @@ const TestCycleDetail: React.FC = () => {
     const fetchCicloDetails = useCallback(async () => {
         if (!cicloId || !user) return;
         setLoading(true);
+        console.log("entrou")
         setError('');
         try {
             const cicloResponse = await fetch(`http://localhost:4000/ciclo-teste/${cicloId}`, {
@@ -93,6 +94,7 @@ const TestCycleDetail: React.FC = () => {
         } catch (err: any) {
             setError(err.message);
         } finally {
+            console.log("Chegou")
             setLoading(false);
         }
     }, [cicloId, user]);
@@ -203,6 +205,7 @@ const TestCycleDetail: React.FC = () => {
 
         {isEditModalOpen && (
             <TestCycleEditModal
+                ciclo = {ciclo as CicloDeTeste}
                 onClose={() => setIsEditModalOpen(false)}
                 onSuccess={handleEditSuccess}
             />
