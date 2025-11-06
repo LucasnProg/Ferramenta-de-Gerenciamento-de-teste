@@ -2,13 +2,14 @@ import { Request, Response } from "express";
 import { ProjectRepoDb } from "../infra/repository/db/ProjectRepoDb";
 
 
+
 export class AddBacklogItemController {
     constructor(private repository: ProjectRepoDb) {}
 
 
     async execute(req: Request, res: Response) {
         const projectId = parseInt(req.params.projectId, 10);
-        const { item, descricao } = req.body;
+        const { item, descricao} = req.body;
         const user = req.user;
 
 
@@ -34,8 +35,10 @@ export class AddBacklogItemController {
                 return res.status(403).json({ error: "Acesso negado. Você não é membro deste projeto." });
             }
 
-
-            const newItem = await this.repository.addBacklogItem(projectId, { item, descricao });
+            const newItem = await this.repository.addBacklogItem(
+                projectId, 
+                { item, descricao}
+            );
 
 
             res.status(201).json(newItem);

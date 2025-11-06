@@ -30,6 +30,8 @@ import { ListCiclosByProjectController } from "../controller/ListCiclosByProject
 import { GetCicloDeTesteByIdController } from "../controller/GetCicloDeTesteByIdController";
 import { EditCicloDeTesteController } from "../controller/EditCicloDeTesteController";
 import { DeleteCicloDeTesteController } from "../controller/DeleteCicloDeTesteController";
+import { CreateTestSuiteController } from "../controller/CreateTestSuiteController";
+import { MoveBacklogItemController } from "../controller/MoveBacklogItemController";
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -67,6 +69,8 @@ const listCiclosByProjectController = new ListCiclosByProjectController(projectR
 const getCicloDeTesteByIdController = new GetCicloDeTesteByIdController(projectRepo);
 const editCicloDeTesteController = new EditCicloDeTesteController(projectRepo);
 const deleteCicloDeTesteController = new DeleteCicloDeTesteController(projectRepo);
+const createTestSuiteController = new CreateTestSuiteController(projectRepo);
+const moveBacklogItemController = new MoveBacklogItemController(projectRepo);
 
 
 // Listar usuários
@@ -260,6 +264,18 @@ router.delete(
     "/ciclo-teste/:id",
     authMiddleware,
     (req: Request, res: Response) => deleteCicloDeTesteController.execute(req, res)
+);
+
+router.post(
+    "/ciclo-teste/:id/suite",
+    authMiddleware,
+    (req: Request, res: Response) => createTestSuiteController.execute(req, res)
+);
+
+router.put(
+    "/backlog-item/:itemId/move",
+    authMiddleware,
+    (req: Request, res: Response) => moveBacklogItemController.execute(req, res)
 );
 
 export { router };

@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { TestCycleEditModal } from '../../components/TestCycleEditModal';
+import { CreateTestSuiteModal } from '../../components/CreateTestSuiteModal';
 import {
     PageContainer,
     Header,
@@ -11,7 +12,6 @@ import {
     BackButton,
     Content,
     StartButton,
-    SectionTitle,
     DescriptionCard,
     CardTitle,
     CardText,
@@ -20,13 +20,24 @@ import {
     BacklogTd,
     BacklogTr,
     EditButton,
-    DeleteButton
+    DeleteButton,
+    SuiteContainer, 
+    SuiteHeader,
+    SuiteTitle
 } from './styles';
 
 interface BacklogItem {
     id: number;
     item: string;
-    descricao?: string; 
+    descricao?: string;
+    id_suite_de_teste: number | null;
+}
+
+interface TestSuite {
+    id: number;
+    titulo: string;
+    descricao?: string;
+    itens_backlog: BacklogItem[];
 }
 
 interface CicloDeTeste {
@@ -34,7 +45,8 @@ interface CicloDeTeste {
     id_projeto: number;
     titulo: string;
     descricao?: string;
-    itens_backlog?: BacklogItem[];
+    suites: TestSuite[]; 
+    itens_nao_atribuidos: BacklogItem[];
 }
 
 interface Participant {
@@ -57,11 +69,11 @@ const TestCycleDetail: React.FC = () => {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [isLoadingDelete, setIsLoadingDelete] = useState(false);
     const [modalError, setModalError] = useState<string | null>(null);
+    const [isCreateSuiteModalOpen, setIsCreateSuiteModalOpen] = useState(false);
 
     const fetchCicloDetails = useCallback(async () => {
         if (!cicloId || !user) return;
         setLoading(true);
-        console.log("entrou")
         setError('');
         try {
             const cicloResponse = await fetch(`http://localhost:4000/ciclo-teste/${cicloId}`, {
@@ -71,7 +83,6 @@ const TestCycleDetail: React.FC = () => {
                  const errData = await cicloResponse.json();
                  throw new Error(errData.error || 'Falha ao carregar o ciclo de teste.');
             }
-
             const data: CicloDeTeste = await cicloResponse.json();
             setCiclo(data);
 
@@ -83,18 +94,11 @@ const TestCycleDetail: React.FC = () => {
                  throw new Error(errData.error || 'Falha ao verificar permissões do projeto.');
             }
             const projectData: { participantes: Participant[] } = await projectResponse.json();
-
             const manager = projectData.participantes.find(p => p.role.toLowerCase() === 'gerente');
-            if (user && manager && user.id === manager.id) {
-                setIsManager(true);
-            } else {
-                setIsManager(false);
-            }
-
+            setIsManager(!!(user && manager && user.id === manager.id));
         } catch (err: any) {
             setError(err.message);
         } finally {
-            console.log("Chegou")
             setLoading(false);
         }
     }, [cicloId, user]);
@@ -122,10 +126,7 @@ const TestCycleDetail: React.FC = () => {
         try {
             const response = await fetch(`http://localhost:4000/ciclo-teste/${ciclo.id}`, {
                 method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'user-id': user.id
-                },
+                headers: {'Content-Type': 'application/json', 'user-id': user.id},
                 body: JSON.stringify({ email, password })
             });
             if (response.status === 401 || response.status === 403) {
@@ -146,12 +147,21 @@ const TestCycleDetail: React.FC = () => {
     };
 
     const handleEditSuccess = () => {
+        setIsEditModalOpen(false);
         fetchCicloDetails();
     };
+
+    const handleSuiteCreated = () => {
+        setIsCreateSuiteModalOpen(false);
+        fetchCicloDetails(); 
+    };
+
 
     if (loading) return <PageContainer><p>Carregando ciclo...</p></PageContainer>;
     if (error) return <PageContainer><p style={{ color: 'red' }}>Erro: {error}</p></PageContainer>;
     if (!ciclo) return <PageContainer><p>Ciclo não encontrado.</p></PageContainer>;
+
+    const hasUnassignedItems = ciclo.itens_nao_atribuidos?.length > 0;
 
     return (
         <>
@@ -176,36 +186,99 @@ const TestCycleDetail: React.FC = () => {
                     <CardText>{ciclo.descricao || "Este ciclo não possui descrição."}</CardText>
                 </DescriptionCard>
 
-                <SectionTitle>Itens de Backlog</SectionTitle>
-                <BacklogTable>
-                    <thead>
-                        <BacklogTr>
-                            <BacklogTh style={{ width: '40%' }}>Item</BacklogTh>
-                            <BacklogTh style={{ width: '60%' }}>Descrição</BacklogTh>
-                        </BacklogTr>
-                    </thead>
-                    <tbody>
-                        {ciclo.itens_backlog?.map(item => (
-                            <BacklogTr key={item.id}>
-                                <BacklogTd>{item.item}</BacklogTd>
-                                <BacklogTd>{item.descricao || '-'}</BacklogTd>
-                            </BacklogTr>
-                        ))}
-                        {(ciclo.itens_backlog?.length === 0) && (
-                            <BacklogTr>
-                                <BacklogTd colSpan={2} style={{ textAlign: 'center' }}>
-                                    Nenhum item de backlog foi incluído neste ciclo.
-                                </BacklogTd>
-                            </BacklogTr>
+                <HeaderActions style={{ justifyContent: 'flex-start', padding: '1rem 0' }}>
+                    <StartButton 
+                        onClick={() => setIsCreateSuiteModalOpen(true)}
+                        disabled={!hasUnassignedItems} 
+                    >
+                        + Criar Nova Suíte
+                    </StartButton>
+                </HeaderActions>
+                {!hasUnassignedItems && ciclo.suites.length > 0 && (
+                    <p style={{ textAlign: 'center', margin: '10px 0', color: '#777' }}>
+                        Todos os testes deste ciclo já foram atribuídos a suítes.
+                    </p>
+                )}
+
+                {(hasUnassignedItems || ciclo.suites.length === 0) && (
+                    <SuiteContainer>
+                        <SuiteHeader>
+                            <SuiteTitle>Testes Não Atribuídos</SuiteTitle>
+                        </SuiteHeader>
+                        {!hasUnassignedItems && (
+                            <p style={{ textAlign: 'center', margin: '1rem 0', color: '#777' }}>
+                                Nenhum teste selecionado do backlog para este ciclo.
+                            </p>
                         )}
-                    </tbody>
-                </BacklogTable>
+                        {hasUnassignedItems && (
+                            <BacklogTable>
+                                <thead>
+                                    <BacklogTr>
+                                        <BacklogTh style={{ width: '40%' }}>Item (Teste)</BacklogTh>
+                                        <BacklogTh style={{ width: '60%' }}>Descrição</BacklogTh>
+                                    </BacklogTr>
+                                </thead>
+                                <tbody>
+                                    {ciclo.itens_nao_atribuidos.map(item => (
+                                        <BacklogTr key={item.id}>
+                                            <BacklogTd>{item.item}</BacklogTd>
+                                            <BacklogTd>{item.descricao || '-'}</BacklogTd>
+                                        </BacklogTr>
+                                    ))}
+                                </tbody>
+                            </BacklogTable>
+                        )}
+                    </SuiteContainer>
+                )}
+
+                {ciclo.suites.map(suite => (
+                    <SuiteContainer key={suite.id}>
+                        <SuiteHeader>
+                            <SuiteTitle>{suite.titulo}</SuiteTitle>
+                        </SuiteHeader>
+                        {suite.descricao && <CardText style={{marginBottom: '1rem'}}>{suite.descricao}</CardText>}
+                        
+                        <BacklogTable>
+                            <thead>
+                                <BacklogTr>
+                                    <BacklogTh style={{ width: '40%' }}>Item (Teste)</BacklogTh>
+                                    <BacklogTh style={{ width: '60%' }}>Descrição</BacklogTh>
+                                </BacklogTr>
+                            </thead>
+                            <tbody>
+                                {suite.itens_backlog?.map(item => (
+                                    <BacklogTr key={item.id}>
+                                        <BacklogTd>{item.item}</BacklogTd>
+                                        <BacklogTd>{item.descricao || '-'}</BacklogTd>
+                                    </BacklogTr>
+                                ))}
+                                {(suite.itens_backlog?.length === 0) && (
+                                    <BacklogTr>
+                                        <BacklogTd colSpan={2} style={{ textAlign: 'center' }}>
+                                            Nenhum teste foi atribuído a esta suíte.
+                                        </BacklogTd>
+                                    </BacklogTr>
+                                )}
+                            </tbody>
+                        </BacklogTable>
+                    </SuiteContainer>
+                ))}
+
             </Content>
         </PageContainer>
 
+        {isCreateSuiteModalOpen && ciclo && (
+            <CreateTestSuiteModal
+                cicloId={ciclo.id}
+                onClose={() => setIsCreateSuiteModalOpen(false)}
+                onSuiteCreated={handleSuiteCreated}
+                itensNaoAtribuidos={ciclo.itens_nao_atribuidos}
+            />
+        )}
+        
         {isEditModalOpen && (
             <TestCycleEditModal
-                ciclo = {ciclo as CicloDeTeste}
+                ciclo = {ciclo as any}
                 onClose={() => setIsEditModalOpen(false)}
                 onSuccess={handleEditSuccess}
             />
@@ -225,4 +298,5 @@ const TestCycleDetail: React.FC = () => {
         </>
     );
 };
+
 export default TestCycleDetail;

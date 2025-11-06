@@ -33,6 +33,28 @@ CREATE TABLE IF NOT EXISTS backlog_items (
     CONSTRAINT backlog_projeto_fk FOREIGN KEY (id_projeto) REFERENCES projetos(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+-- Tabela para os Ciclos de Teste
+CREATE TABLE IF NOT EXISTS ciclos_de_teste (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id_projeto INTEGER NOT NULL,
+    titulo VARCHAR(100) NOT NULL,
+    descricao TEXT NULL,
+    data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT ciclo_projeto_fk FOREIGN KEY (id_projeto) REFERENCES projetos(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS test_suites (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id_ciclo_de_teste INTEGER NOT NULL,
+    titulo VARCHAR(255) NOT NULL,
+    descricao TEXT NULL,
+    CONSTRAINT suite_ciclo_fk FOREIGN KEY (id_ciclo_de_teste) REFERENCES ciclos_de_teste(id) ON DELETE CASCADE
+);
+
+ALTER TABLE backlog_items
+ADD COLUMN id_suite_de_teste INTEGER NULL,
+ADD CONSTRAINT backlog_suite_fk FOREIGN KEY (id_suite_de_teste) REFERENCES test_suites(id) ON DELETE SET NULL;
+
 CREATE TABLE IF NOT EXISTS usuarios_projeto (
     id_projeto INTEGER,
     id_usuario VARCHAR(36),
@@ -43,15 +65,7 @@ CREATE TABLE IF NOT EXISTS usuarios_projeto (
     CONSTRAINT usuario_fk FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- Tabela para os Ciclos de Teste
-CREATE TABLE IF NOT EXISTS ciclos_de_teste (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
-    id_projeto INTEGER NOT NULL,
-    titulo VARCHAR(100) NOT NULL,
-    descricao TEXT NULL,
-    data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT ciclo_projeto_fk FOREIGN KEY (id_projeto) REFERENCES projetos(id) ON DELETE CASCADE ON UPDATE CASCADE
-);
+
 
 -- Tabela de ligação (Muitos-para-Muitos) entre Ciclos e Itens do Backlog
 CREATE TABLE IF NOT EXISTS ciclo_backlog_items (

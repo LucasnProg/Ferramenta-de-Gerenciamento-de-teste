@@ -40,7 +40,8 @@ export class ImportBacklogController {
                     if (row.item) {
                         items.push({
                             item: row.item,
-                            descricao: row.descricao || null 
+                            descricao: row.descricao || null,
+                            id_suite_de_teste: null
                         });
                     } else {
                         console.warn('Linha do CSV ignorada por falta do "Resumo":', row);
