@@ -4,7 +4,7 @@ import useAuth from '../../hooks/useAuth';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { TestCycleEditModal } from '../../components/TestCycleEditModal';
 import { CreateTestSuiteModal } from '../../components/CreateTestSuiteModal';
-import { ReportTestModal } from '../../components/ReportTestModal'; // 1. Importar o novo modal
+import { ReportTestModal } from '../../components/ReportTestModal'; 
 import {
     PageContainer,
     Header,
