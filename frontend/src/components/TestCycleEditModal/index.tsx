@@ -8,19 +8,21 @@ import {
     Checkbox, ButtonGroup, ErrorText
 } from './styles';
 
-interface BacklogItem {
+interface BacklogItemType {
     id: number;
     item: string;
 }
-interface CicloDeTeste {
+
+interface CicloDeTesteType {
     id: number;
     id_projeto: number;
     titulo: string;
     descricao?: string;
-    itens_backlog?: BacklogItem[];
+    itens_backlog?: BacklogItemType[]; 
 }
+
 interface Props {
-    ciclo: CicloDeTeste;
+    ciclo: CicloDeTesteType;
     onClose: () => void;
     onSuccess: () => void;
 }
@@ -29,12 +31,24 @@ export const TestCycleEditModal: React.FC<Props> = ({ ciclo, onClose, onSuccess 
     const { user } = useAuth();
     const [titulo, setTitulo] = useState(ciclo.titulo);
     const [descricao, setDescricao] = useState(ciclo.descricao || '');
-    const [allBacklogItems, setAllBacklogItems] = useState<BacklogItem[]>([]);
-    const [selectedItems, setSelectedItems] = useState<number[]>(() => 
-        ciclo.itens_backlog?.map(item => item.id) ?? [] 
-    );
+    const [allBacklogItems, setAllBacklogItems] = useState<BacklogItemType[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const [selectedItems, setSelectedItems] = useState<number[]>(() => {
+        if (ciclo && ciclo.itens_backlog) {
+            return ciclo.itens_backlog.map((item) => Number(item.id));
+        }
+        return [];
+    });
+
+    useEffect(() => {
+        if (ciclo && ciclo.itens_backlog) {
+            const existingIds = ciclo.itens_backlog.map((item) => Number(item.id));
+            console.log("EDIT MODAL - IDs sincronizados:", existingIds);
+            setSelectedItems(existingIds);
+        }
+    }, [ciclo]);
 
     const fetchAllBacklogItems = useCallback(async () => {
         if (!user) return;
@@ -44,7 +58,7 @@ export const TestCycleEditModal: React.FC<Props> = ({ ciclo, onClose, onSuccess 
             });
             if (!response.ok) throw new Error('Falha ao buscar backlog do projeto.');
             const data = await response.json();
-            setAllBacklogItems(data);
+            setAllBacklogItems(data.map((d: any) => ({ ...d, id: Number(d.id) })));
         } catch (err: any) {
             setError(err.message);
         }
@@ -55,17 +69,18 @@ export const TestCycleEditModal: React.FC<Props> = ({ ciclo, onClose, onSuccess 
     }, [fetchAllBacklogItems]);
 
     const handleSelectItem = (itemId: number) => {
+        const numericId = Number(itemId);
         setSelectedItems(prev =>
-            prev.includes(itemId)
-                ? prev.filter(id => id !== itemId)
-                : [...prev, itemId]
+            prev.includes(numericId)
+                ? prev.filter(id => id !== numericId)
+                : [...prev, numericId]
         );
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!titulo || selectedItems.length === 0) {
-            setError("Título e pelo menos um item são obrigatórios.");
+        if (!titulo) {
+            setError("O título do ciclo é obrigatório.");
             return;
         }
         setLoading(true);
@@ -112,8 +127,7 @@ export const TestCycleEditModal: React.FC<Props> = ({ ciclo, onClose, onSuccess 
                     <div>
                         <Label htmlFor="titulo">Título do Ciclo</Label>
                         <Input
-                            type="text"
-                            placeholder=""
+                            id="titulo" type="text"
                             value={titulo}
                             onChange={(e) => setTitulo(e.target.value)}
                         />
@@ -129,12 +143,12 @@ export const TestCycleEditModal: React.FC<Props> = ({ ciclo, onClose, onSuccess 
                     <div>
                         <Label>Itens do Backlog Incluídos</Label>
                         <BacklogListContainer>
-                            {allBacklogItems.length === 0 && <p style={{ padding: '15px' }}>Carregando...</p>}
+                            {allBacklogItems.length === 0 && <p style={{ padding: '15px' }}>Carregando itens...</p>}
                             {allBacklogItems.map(item => (
                                 <BacklogItem key={item.id}>
                                     <Checkbox
                                         id={`edit-item-${item.id}`}
-                                        checked={selectedItems.includes(item.id)}
+                                        checked={selectedItems.includes(Number(item.id))}
                                         onChange={() => handleSelectItem(item.id)}
                                     />
                                     {item.item}
@@ -146,7 +160,7 @@ export const TestCycleEditModal: React.FC<Props> = ({ ciclo, onClose, onSuccess 
                     {error && <ErrorText>{error}</ErrorText>}
 
                     <ButtonGroup>
-                        <Button type="button" onClick={onClose}>
+                        <Button type="button" onClick={onClose} styleType="secondary">
                             Cancelar
                         </Button>
                         <Button type="submit" disabled={loading} style={{ backgroundColor: '#007bff' }}>

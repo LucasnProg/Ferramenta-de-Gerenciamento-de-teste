@@ -17,6 +17,7 @@ import {
     CardTitle,
     CardText,
     BacklogTable,
+    TableResponsive,
     BacklogTh,
     BacklogTd,
     BacklogTr,
@@ -219,22 +220,24 @@ const TestCycleDetail: React.FC = () => {
                                 </p>
                             )}
                             {hasUnassignedItems && (
-                                <BacklogTable>
-                                    <thead>
-                                        <BacklogTr>
-                                            <BacklogTh style={{ width: '40%' }}>Item (Teste)</BacklogTh>
-                                            <BacklogTh style={{ width: '60%' }}>Descrição</BacklogTh>
-                                        </BacklogTr>
-                                    </thead>
-                                    <tbody>
-                                        {ciclo.itens_nao_atribuidos.map(item => (
-                                            <BacklogTr key={item.id}>
-                                                <BacklogTd>{item.item}</BacklogTd>
-                                                <BacklogTd>{item.descricao || '-'}</BacklogTd>
+                                <TableResponsive>
+                                    <BacklogTable>
+                                        <thead>
+                                            <BacklogTr>
+                                                <BacklogTh style={{ width: '40%' }}>Item (Teste)</BacklogTh>
+                                                <BacklogTh style={{ width: '60%' }}>Descrição</BacklogTh>
                                             </BacklogTr>
-                                        ))}
-                                    </tbody>
-                                </BacklogTable>
+                                        </thead>
+                                        <tbody>
+                                            {ciclo.itens_nao_atribuidos.map(item => (
+                                                <BacklogTr key={item.id}>
+                                                    <BacklogTd>{item.item}</BacklogTd>
+                                                    <BacklogTd>{item.descricao || '-'}</BacklogTd>
+                                                </BacklogTr>
+                                            ))}
+                                        </tbody>
+                                    </BacklogTable>
+                                </TableResponsive>
                             )}
                         </SuiteContainer>
                     )}

@@ -16,22 +16,19 @@ export class GetCicloDeTesteByIdController {
         }
 
         try {
-            const cicloBase = await this.repository.findCicloById(Number(cicloId));
-            if (!cicloBase) {
+            const cicloCompleto = await this.repository.findCicloCompletoById(Number(cicloId));
+            
+            if (!cicloCompleto) {
                 return res.status(404).json({ error: "Ciclo de teste não encontrado." });
             }
-
-            const project = await this.repository.findById(cicloBase.id_projeto);
+            
+            const project = await this.repository.findById(cicloCompleto.id_projeto);
             if (!project) {
                  return res.status(404).json({ error: "Projeto associado não encontrado." });
             }
             const isParticipant = project.getParticipantes().some(p => p.id === user.getId().getValue());
             if (!isParticipant) {
                 return res.status(403).json({ error: "Acesso negado. Você não é membro deste projeto." });
-            }
-            const cicloCompleto = await this.repository.findCicloCompletoById(Number(cicloId));
-            if (!cicloCompleto) {
-                return res.status(404).json({ error: "Ciclo de teste não encontrado (erro 2)." });
             }
 
             res.status(200).json(cicloCompleto);

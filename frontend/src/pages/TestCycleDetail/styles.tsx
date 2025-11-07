@@ -42,7 +42,10 @@ export const BackButton = styled.button`
 `;
 
 export const Content = styled.main`
-    padding-top: 1.5rem;
+    padding: 30px 5px;
+    flex-grow: 1;
+    width: 100%;
+    overflow: hidden;
 `;
 
 export const StartButton = styled.button`
@@ -98,12 +101,19 @@ export const CardText = styled.p`
     white-space: pre-wrap;
 `;
 
+export const TableResponsive = styled.div`
+  width: 100%;
+  overflow-x: auto; // Adiciona scroll horizontal se necessário
+  margin-bottom: 20px;
+`;
+
 export const BacklogTable = styled.table`
     width: 100%;
     border-collapse: collapse;
-    background: #fff;
-    border-radius: 4px;
-    overflow: hidden;
+    background-color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    table-layout: fixed;  
 `;
 
 export const BacklogTh = styled.th`
@@ -121,6 +131,9 @@ export const BacklogTd = styled.td`
     border-bottom: 1px solid #eee;
     color: #444;
     vertical-align: middle;
+    word-break: break-word; 
+    overflow-wrap: break-word;
+    white-space: normal;
 `;
 
 export const BacklogTr = styled.tr`

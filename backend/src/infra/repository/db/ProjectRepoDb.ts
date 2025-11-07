@@ -356,7 +356,8 @@ export class ProjectRepoDb {
         return {
             ...ciclo,
             suites: suitesComItens,
-            itens_nao_atribuidos: itensNaoAtribuidos
+            itens_nao_atribuidos: itensNaoAtribuidos,
+            itens_backlog: itensVinculados 
         };
     }
 
