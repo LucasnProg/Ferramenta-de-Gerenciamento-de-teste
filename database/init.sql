@@ -75,3 +75,19 @@ CREATE TABLE IF NOT EXISTS ciclo_backlog_items (
     CONSTRAINT ciclo_fk FOREIGN KEY (id_ciclo) REFERENCES ciclos_de_teste(id) ON DELETE CASCADE,
     CONSTRAINT item_backlog_fk FOREIGN KEY (id_item_backlog) REFERENCES backlog_items(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS test_executions (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id_backlog_item INTEGER NOT NULL,
+    id_test_suite INTEGER NOT NULL,
+    id_ciclo_de_teste INTEGER NOT NULL,
+    id_usuario VARCHAR(36) NOT NULL,
+    resultado ENUM('passou', 'falhou', 'nao_testado') NOT NULL DEFAULT 'nao_testado',
+    descricao TEXT NULL,
+    data_execucao DATETIME DEFAULT CURRENT_TIMESTAMP, 
+    
+    CONSTRAINT exec_backlog_fk FOREIGN KEY (id_backlog_item) REFERENCES backlog_items(id) ON DELETE CASCADE,
+    CONSTRAINT exec_suite_fk FOREIGN KEY (id_test_suite) REFERENCES test_suites(id) ON DELETE CASCADE,
+    CONSTRAINT exec_ciclo_fk FOREIGN KEY (id_ciclo_de_teste) REFERENCES ciclos_de_teste(id) ON DELETE CASCADE,
+    CONSTRAINT exec_usuario_fk FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE
+);

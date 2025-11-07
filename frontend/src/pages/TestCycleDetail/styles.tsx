@@ -186,3 +186,39 @@ export const Input = styled.input`
         box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
     }
 `;
+
+export const SuiteActions = styled.div`
+    display: flex;
+    gap: 0.5rem;
+`;
+
+const ReportButton = styled.button`
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+`;
+
+export const ReportTestButton = styled(ReportButton)`
+    background-color: #28a745;
+    color: white;
+    &:hover:not(:disabled) {
+        background-color: #218838;
+    }
+`;
+
+export const ViewReportButton = styled(ReportButton)`
+    background-color: #6c757d;
+    color: white;
+    &:hover:not(:disabled) {
+        background-color: #5a6268;
+    }
+`;

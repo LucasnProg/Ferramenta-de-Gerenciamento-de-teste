@@ -35,7 +35,7 @@ import { MoveBacklogItemController } from "../controller/MoveBacklogItemControll
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-
+import { ReportTestResultsController } from "../controller/ReportTestResultsController"; 
 
 const router = Router();
 
@@ -71,7 +71,7 @@ const editCicloDeTesteController = new EditCicloDeTesteController(projectRepo);
 const deleteCicloDeTesteController = new DeleteCicloDeTesteController(projectRepo);
 const createTestSuiteController = new CreateTestSuiteController(projectRepo);
 const moveBacklogItemController = new MoveBacklogItemController(projectRepo);
-
+const reportTestResultsController = new ReportTestResultsController(projectRepo); 
 
 // Listar usuários
 router.get("/usuarios", (req: Request, res: Response) => {
@@ -276,6 +276,12 @@ router.put(
     "/backlog-item/:itemId/move",
     authMiddleware,
     (req: Request, res: Response) => moveBacklogItemController.execute(req, res)
+);
+
+router.post(
+    "/suite/:id/report",
+    authMiddleware,
+    (req: Request, res: Response) => reportTestResultsController.execute(req, res)
 );
 
 export { router };
