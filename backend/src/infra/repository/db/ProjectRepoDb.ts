@@ -1,6 +1,4 @@
 import { Knex } from "knex";
-// As importações de modelo (Projeto, Participant, BacklogItem, etc.) devem estar aqui
-// Assumindo que você tem os modelos definidos em "../../../model/"
 import { Projeto, Participant } from "../../../model/Projeto";
 import { db } from "./knex";
 import { BacklogItem, NewBacklogItem } from "../../../model/BacklogItem";
@@ -12,11 +10,9 @@ export class ProjectRepoDb {
     private connection: Knex;
 
     constructor() {
-        // 'db' é o objeto Knex configurado (assumindo que vem de "./knex")
         this.connection = db; 
     }
 
-    // Métodos para Projeto (save, getAll, update, delete, findById, findByUserId, addParticipant, etc.)
     async save(project: Projeto, userId: string): Promise<number> {
         const trx = await this.connection.transaction();
         try {
@@ -45,7 +41,6 @@ export class ProjectRepoDb {
             .join('usuarios_projeto as up', 'p.id', 'up.id_projeto')
             .where('up.papel_usuario', 'gerente')
             .select('p.id', 'p.titulo', 'p.descricao', 'up.id_usuario');
-        // A conversão `new Projeto(...)` exige o modelo `Projeto` importado
         return projectsData.map((p: any) => new Projeto(p.titulo, p.descricao, p.id_usuario)); 
     }
 
@@ -77,7 +72,6 @@ export class ProjectRepoDb {
         if (!participantsData || participantsData.length === 0) return null;
         const creatorData = participantsData.find((p: Participant) => p.role === 'gerente');
         if (!creatorData) return null;
-        // A conversão `new Projeto(...)` exige o modelo `Projeto` e `Participant` importados
         const projeto = new Projeto(projectData.titulo, projectData.descricao, creatorData, projectData.id); 
         participantsData.forEach((p: Participant) => {
             projeto.addParticipant(p.id, p.name, p.email, p.role);
@@ -93,7 +87,6 @@ export class ProjectRepoDb {
         const userData = await this.connection('usuarios').where({ id: userId }).first();
         if (!userData) return [];
         const creator = { id: userData.id, name: userData.name, email: userData.email };
-        // A conversão `new Projeto(...)` exige o modelo `Projeto` importado
         return projectsData.map((p: any) => new Projeto(p.titulo, p.descricao, creator, p.id)); 
     }
 
@@ -126,7 +119,6 @@ export class ProjectRepoDb {
             .update({ notificado: true });
     }
 
-    // Métodos para BacklogItem (saveBacklogItems, getBacklogItemsByProjectId, etc.)
     async saveBacklogItems(projectId: number, items: NewBacklogItem[]): Promise<void> {
         const itemsToInsert = items.map(item => ({
             id_projeto: projectId,
@@ -204,7 +196,6 @@ export class ProjectRepoDb {
         }
     }
 
-    // Métodos para CicloDeTeste (createCicloDeTeste, listCiclosByProjectId, etc.)
     async createCicloDeTeste(novoCiclo: NewCicloDeTeste): Promise<CicloDeTeste> {
         const trx = await this.connection.transaction();
         try {
@@ -247,7 +238,7 @@ export class ProjectRepoDb {
             id_projeto: ciclo.id_projeto,
             titulo: ciclo.titulo,
             descricao: ciclo.descricao,
-            data_criacao: ciclo.data_criacao // Assumindo que o campo data_criacao existe no modelo CicloDeTeste
+            data_criacao: ciclo.data_criacao
         };
     }
 
@@ -289,7 +280,6 @@ export class ProjectRepoDb {
         }
     }
 
-    // Métodos para TestSuite (createTestSuite, moveBacklogItem, etc.)
     async createTestSuite(suiteData: NewTestSuite): Promise<TestSuite> {
         const trx = await this.connection.transaction();
         try {
@@ -366,7 +356,7 @@ export class ProjectRepoDb {
             ...ciclo,
             suites: suitesComItens,
             itens_nao_atribuidos: itensNaoAtribuidos,
-            itens_backlog: itensVinculados // Incluir todos os itens vinculados também pode ser útil
+            itens_backlog: itensVinculados
         };
     }
 
@@ -381,7 +371,6 @@ export class ProjectRepoDb {
     async updateTestSuite(suiteId: number, data: { titulo: string; descricao?: string; itemIds: number[] }): Promise<TestSuite | null> {
         const trx = await this.connection.transaction();
         try {
-            // 1. Atualiza os dados da suíte (título e descrição)
             await trx('test_suites')
                 .where({ id: suiteId })
                 .update({
@@ -389,12 +378,10 @@ export class ProjectRepoDb {
                     descricao: data.descricao
                 });
 
-            // 2. Desvincula todos os itens que *atualmente* pertencem a esta suíte (1:N)
             await trx('backlog_items')
                 .where({ id_suite_de_teste: suiteId })
                 .update({ id_suite_de_teste: null });
 
-            // 3. Vincula os *novos* itens selecionados a esta suíte (1:N)
             if (data.itemIds && data.itemIds.length > 0) {
                 await trx('backlog_items')
                     .whereIn('id', data.itemIds)
@@ -415,12 +402,10 @@ export class ProjectRepoDb {
     async deleteTestSuite(suiteId: number): Promise<void> {
         const trx = await this.connection.transaction();
         try {
-            // 1. Desvincula todos os itens da suíte (voltando a ser "Não Atribuídos" no modelo 1:N)
             await trx('backlog_items')
                 .where({ id_suite_de_teste: suiteId })
                 .update({ id_suite_de_teste: null });
 
-            // 2. Exclui a suíte
             await trx('test_suites')
                 .where({ id: suiteId })
                 .del();
@@ -434,7 +419,6 @@ export class ProjectRepoDb {
         }
     }
 
-    // Métodos para TestResult (saveTestResults)
     async saveTestResults(results: NewTestResult[]): Promise<void> {
         const trx = await this.connection.transaction();
         try {
