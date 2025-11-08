@@ -32,6 +32,8 @@ import { EditCicloDeTesteController } from "../controller/EditCicloDeTesteContro
 import { DeleteCicloDeTesteController } from "../controller/DeleteCicloDeTesteController";
 import { CreateTestSuiteController } from "../controller/CreateTestSuiteController";
 import { MoveBacklogItemController } from "../controller/MoveBacklogItemController";
+import { EditTestSuiteController } from "../controller/EditTestSuiteController";
+import { DeleteTestSuiteController } from "../controller/DeleteTestSuiteController";
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -72,6 +74,9 @@ const deleteCicloDeTesteController = new DeleteCicloDeTesteController(projectRep
 const createTestSuiteController = new CreateTestSuiteController(projectRepo);
 const moveBacklogItemController = new MoveBacklogItemController(projectRepo);
 const reportTestResultsController = new ReportTestResultsController(projectRepo); 
+const editTestSuiteController = new EditTestSuiteController(projectRepo);
+const deleteTestSuiteController = new DeleteTestSuiteController(projectRepo, usersRepository);
+
 
 // Listar usuários
 router.get("/usuarios", (req: Request, res: Response) => {
@@ -282,6 +287,24 @@ router.post(
     "/suite/:id/report",
     authMiddleware,
     (req: Request, res: Response) => reportTestResultsController.execute(req, res)
+);
+
+router.post(
+    "/ciclo-teste/:id/suite",
+    authMiddleware,
+    (req: Request, res: Response) => createTestSuiteController.execute(req, res)
+);
+
+router.put(
+    "/suite/:id", 
+    authMiddleware,
+    (req: Request, res: Response) => editTestSuiteController.execute(req, res)
+);
+
+router.delete(
+    "/suite/:id",
+    authMiddleware,
+    (req: Request, res: Response) => deleteTestSuiteController.execute(req, res)
 );
 
 export { router };

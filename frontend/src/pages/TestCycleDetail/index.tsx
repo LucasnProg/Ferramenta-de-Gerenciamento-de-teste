@@ -5,6 +5,7 @@ import ConfirmationModal from '../../components/ConfirmationModal';
 import { TestCycleEditModal } from '../../components/TestCycleEditModal';
 import { CreateTestSuiteModal } from '../../components/CreateTestSuiteModal';
 import { ReportTestModal } from '../../components/ReportTestModal'; 
+import { EditTestSuiteModal } from '../../components/EditTestSuiteModal';
 import {
     PageContainer,
     Header,
@@ -76,6 +77,11 @@ const TestCycleDetail: React.FC = () => {
     const [modalError, setModalError] = useState<string | null>(null);
     const [isCreateSuiteModalOpen, setIsCreateSuiteModalOpen] = useState(false);
     const [reportingSuite, setReportingSuite] = useState<TestSuite | null>(null);
+    const [editingSuite, setEditingSuite] = useState<TestSuite | null>(null); 
+    const [deletingSuite, setDeletingSuite] = useState<TestSuite | null>(null); 
+    const [isConfirmDeleteSuiteOpen, setIsConfirmDeleteSuiteOpen] = useState(false);
+    const [modalDeleteSuiteError, setModalDeleteSuiteError] = useState<string | null>(null);
+    const [isLoadingDeleteSuite, setIsLoadingDeleteSuite] = useState(false);
 
     const fetchCicloDetails = useCallback(async () => {
         if (!cicloId || !user) return;
@@ -157,6 +163,11 @@ const TestCycleDetail: React.FC = () => {
         fetchCicloDetails();
     };
 
+    const handleSuiteUpdated = () => {
+         setEditingSuite(null);
+         fetchCicloDetails();
+     };
+
     const handleSuiteCreated = () => {
         setIsCreateSuiteModalOpen(false);
         fetchCicloDetails();
@@ -166,12 +177,49 @@ const TestCycleDetail: React.FC = () => {
         setReportingSuite(null);
     };
 
+    const handleConfirmDeleteSuite = async (email: string, password: string) => {
+        if (!deletingSuite || !user) return;
+        if (user?.email !== email) {
+            return setModalDeleteSuiteError("O e-mail digitado não corresponde ao da sua conta (gerente).");
+        }
+        setIsLoadingDeleteSuite(true);
+        setModalDeleteSuiteError(null);
+        try {
+            const response = await fetch(`http://localhost:4000/suite/${deletingSuite.id}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json', 'user-id': user.id },
+                body: JSON.stringify({ email, password }) 
+            });
+            if (response.status === 401 || response.status === 403) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "E-mail ou Senha incorreta.");
+            }
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Falha ao excluir a suíte.");
+            }
+            
+            setIsConfirmDeleteSuiteOpen(false);
+            setDeletingSuite(null);
+            fetchCicloDetails(); 
+        } catch (err: any) {
+            setModalDeleteSuiteError(err.message);
+        } finally {
+            setIsLoadingDeleteSuite(false);
+        }
+    };
+
     if (loading) return <PageContainer><p>Carregando ciclo...</p></PageContainer>;
     if (error) return <PageContainer><p style={{ color: 'red' }}>Erro: {error}</p></PageContainer>;
     if (!ciclo) return <PageContainer><p>Ciclo não encontrado.</p></PageContainer>;
 
     const hasUnassignedItems = ciclo.itens_nao_atribuidos?.length > 0;
+    const itensEmSuites = ciclo.suites.flatMap(suite => suite.itens_backlog);
 
+    const todosOsItensDoCiclo = [
+        ...ciclo.itens_nao_atribuidos,
+        ...itensEmSuites
+    ];
     return (
         <>
             <PageContainer>
@@ -198,21 +246,16 @@ const TestCycleDetail: React.FC = () => {
                     <HeaderActions style={{ justifyContent: 'flex-start', padding: '1rem 0' }}>
                         <StartButton
                             onClick={() => setIsCreateSuiteModalOpen(true)}
-                            disabled={!hasUnassignedItems}
+                            
                         >
                             + Criar Nova Suíte
                         </StartButton>
                     </HeaderActions>
-                    {!hasUnassignedItems && ciclo.suites.length > 0 && (
-                        <p style={{ textAlign: 'center', margin: '10px 0', color: '#777' }}>
-                            Todos os testes deste ciclo já foram atribuídos a suítes.
-                        </p>
-                    )}
 
                     {(hasUnassignedItems || ciclo.suites.length === 0) && (
                         <SuiteContainer>
                             <SuiteHeader>
-                                <SuiteTitle>Testes Não Atribuídos</SuiteTitle>
+                                <SuiteTitle>Testes Fora de Suítes</SuiteTitle>
                             </SuiteHeader>
                             {!hasUnassignedItems && (
                                 <p style={{ textAlign: 'center', margin: '1rem 0', color: '#777' }}>
@@ -247,6 +290,25 @@ const TestCycleDetail: React.FC = () => {
                             <SuiteHeader>
                                 <SuiteTitle>{suite.titulo}</SuiteTitle>
                                 <SuiteActions>
+                                    {isManager && (
+                                        <>
+                                            <EditButton 
+                                                onClick={() => setEditingSuite(suite)} 
+                                                style={{ marginRight: '8px', padding: '6px 10px' }}
+                                            >
+                                                Editar
+                                            </EditButton>
+                                            <DeleteButton 
+                                                onClick={() => {
+                                                    setDeletingSuite(suite);
+                                                    setIsConfirmDeleteSuiteOpen(true);
+                                                }}
+                                                style={{ marginRight: '16px', padding: '6px 10px' }}
+                                            >
+                                                Excluir
+                                            </DeleteButton>
+                                        </>
+                                    )}
                                     <ReportTestButton onClick={() => setReportingSuite(suite)}>
                                         Relatar Testes
                                     </ReportTestButton>
@@ -298,17 +360,18 @@ const TestCycleDetail: React.FC = () => {
                     cicloId={ciclo.id}
                     onClose={() => setIsCreateSuiteModalOpen(false)}
                     onSuiteCreated={handleSuiteCreated}
-                    itensNaoAtribuidos={ciclo.itens_nao_atribuidos}
+                    itensNaoAtribuidos={todosOsItensDoCiclo}
                 />
             )}
 
-            {isEditModalOpen && (
+{isEditModalOpen && (
                 <TestCycleEditModal
                     ciclo={ciclo as any}
                     onClose={() => setIsEditModalOpen(false)}
                     onSuccess={handleEditSuccess}
                 />
             )}
+            
             <ConfirmationModal
                 isOpen={isConfirmModalOpen}
                 title={`Confirmar Exclusão do Ciclo "${ciclo.titulo}"`}
@@ -321,7 +384,31 @@ const TestCycleDetail: React.FC = () => {
                     setModalError(null);
                 }}
             />
-        </>
+
+            {editingSuite && ciclo && (
+                <EditTestSuiteModal
+                    suite={editingSuite}
+                    onClose={() => setEditingSuite(null)}
+                    onSuiteUpdated={handleSuiteUpdated}
+                    itensDisponiveis={todosOsItensDoCiclo}
+                />
+            )}
+
+            <ConfirmationModal
+                isOpen={isConfirmDeleteSuiteOpen}
+                title={`Confirmar Exclusão da Suíte "${deletingSuite?.titulo}"`}
+                message="Esta ação não pode ser desfeita. Todos os testes desta suíte voltarão a ser 'Não Atribuídos'. Digite seu e-mail e senha de gerente."
+                isLoading={isLoadingDeleteSuite}
+                error={modalDeleteSuiteError}
+                onConfirm={handleConfirmDeleteSuite}
+                onCancel={() => {
+                    setIsConfirmDeleteSuiteOpen(false);
+                    setModalDeleteSuiteError(null);
+                    setDeletingSuite(null);
+                }}
+            />
+
+        </> 
     );
 };
 

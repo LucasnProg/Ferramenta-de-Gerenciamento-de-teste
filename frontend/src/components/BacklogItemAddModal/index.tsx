@@ -20,24 +20,16 @@ interface BacklogItem {
     data_importacao: string;
 }
 
-interface TestSuite {
-    id: number;
-    titulo: string;
-}
 interface Props {
     projectId: number;
-    suites: TestSuite[]; 
     onClose: () => void;
     onItemAdded: (newItem: BacklogItem) => void;
 }
 
-export const BacklogItemAddModal: React.FC<Props> = ({ projectId, suites, onClose, onItemAdded }) => {
+export const BacklogItemAddModal: React.FC<Props> = ({ projectId, onClose, onItemAdded }) => {
     const { user } = useAuth();
     const [item, setItem] = useState('');
     const [descricao, setDescricao] = useState('');
-    const [selectedSuiteId, setSelectedSuiteId] = useState<string>(
-        suites.length > 0 ? suites[0].id.toString() : ''
-    );
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     
@@ -48,10 +40,6 @@ export const BacklogItemAddModal: React.FC<Props> = ({ projectId, suites, onClos
         
         if (!item) {
             setError("O campo 'Item' não pode ficar vazio.");
-            return;
-        }
-        if (!selectedSuiteId) {
-            setError("Você deve selecionar uma suíte de teste.");
             return;
         }
         if (!user) {
@@ -72,7 +60,6 @@ export const BacklogItemAddModal: React.FC<Props> = ({ projectId, suites, onClos
                 body: JSON.stringify({
                     item,
                     descricao,
-                    id_suite_de_teste: parseInt(selectedSuiteId, 10)
                 })
             });
 
@@ -98,21 +85,6 @@ export const BacklogItemAddModal: React.FC<Props> = ({ projectId, suites, onClos
                 <Title>Adicionar Teste</Title>
                 <Form onSubmit={handleSubmit}>
                     
-                    <Label htmlFor="suite-select">Suíte de Teste</Label>
-                    <Input
-                        as="select"
-                        id="suite-select"
-                        value={selectedSuiteId}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedSuiteId(e.target.value)}
-                        required
-                    >
-                        {suites.map(suite => (
-                            <option key={suite.id} value={suite.id}>
-                                {suite.titulo}
-                            </option>
-                        ))}
-                    </Input>
-
                     <Label htmlFor="item-input">Item (Resumo)</Label>
                     <Input
                         id="item-input"
