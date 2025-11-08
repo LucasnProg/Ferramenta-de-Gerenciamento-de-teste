@@ -1,4 +1,6 @@
 import { Knex } from "knex";
+// As importações de modelo (Projeto, Participant, BacklogItem, etc.) devem estar aqui
+// Assumindo que você tem os modelos definidos em "../../../model/"
 import { Projeto, Participant } from "../../../model/Projeto";
 import { db } from "./knex";
 import { BacklogItem, NewBacklogItem } from "../../../model/BacklogItem";
@@ -10,10 +12,11 @@ export class ProjectRepoDb {
     private connection: Knex;
 
     constructor() {
-        this.connection = db;
+        // 'db' é o objeto Knex configurado (assumindo que vem de "./knex")
+        this.connection = db; 
     }
 
-
+    // Métodos para Projeto (save, getAll, update, delete, findById, findByUserId, addParticipant, etc.)
     async save(project: Projeto, userId: string): Promise<number> {
         const trx = await this.connection.transaction();
         try {
@@ -42,7 +45,8 @@ export class ProjectRepoDb {
             .join('usuarios_projeto as up', 'p.id', 'up.id_projeto')
             .where('up.papel_usuario', 'gerente')
             .select('p.id', 'p.titulo', 'p.descricao', 'up.id_usuario');
-        return projectsData.map((p: any) => new Projeto(p.titulo, p.descricao, p.id_usuario));
+        // A conversão `new Projeto(...)` exige o modelo `Projeto` importado
+        return projectsData.map((p: any) => new Projeto(p.titulo, p.descricao, p.id_usuario)); 
     }
 
     async update(id: number, project: Projeto): Promise<void> {
@@ -73,7 +77,8 @@ export class ProjectRepoDb {
         if (!participantsData || participantsData.length === 0) return null;
         const creatorData = participantsData.find((p: Participant) => p.role === 'gerente');
         if (!creatorData) return null;
-        const projeto = new Projeto(projectData.titulo, projectData.descricao, creatorData, projectData.id);
+        // A conversão `new Projeto(...)` exige o modelo `Projeto` e `Participant` importados
+        const projeto = new Projeto(projectData.titulo, projectData.descricao, creatorData, projectData.id); 
         participantsData.forEach((p: Participant) => {
             projeto.addParticipant(p.id, p.name, p.email, p.role);
         });
@@ -88,7 +93,8 @@ export class ProjectRepoDb {
         const userData = await this.connection('usuarios').where({ id: userId }).first();
         if (!userData) return [];
         const creator = { id: userData.id, name: userData.name, email: userData.email };
-        return projectsData.map((p: any) => new Projeto(p.titulo, p.descricao, creator, p.id));
+        // A conversão `new Projeto(...)` exige o modelo `Projeto` importado
+        return projectsData.map((p: any) => new Projeto(p.titulo, p.descricao, creator, p.id)); 
     }
 
     async addParticipant(projectId: number, userId: string, role: string): Promise<void> {
@@ -120,6 +126,7 @@ export class ProjectRepoDb {
             .update({ notificado: true });
     }
 
+    // Métodos para BacklogItem (saveBacklogItems, getBacklogItemsByProjectId, etc.)
     async saveBacklogItems(projectId: number, items: NewBacklogItem[]): Promise<void> {
         const itemsToInsert = items.map(item => ({
             id_projeto: projectId,
@@ -197,6 +204,7 @@ export class ProjectRepoDb {
         }
     }
 
+    // Métodos para CicloDeTeste (createCicloDeTeste, listCiclosByProjectId, etc.)
     async createCicloDeTeste(novoCiclo: NewCicloDeTeste): Promise<CicloDeTeste> {
         const trx = await this.connection.transaction();
         try {
@@ -239,7 +247,7 @@ export class ProjectRepoDb {
             id_projeto: ciclo.id_projeto,
             titulo: ciclo.titulo,
             descricao: ciclo.descricao,
-            data_criacao: ciclo.data_criacao
+            data_criacao: ciclo.data_criacao // Assumindo que o campo data_criacao existe no modelo CicloDeTeste
         };
     }
 
@@ -281,43 +289,44 @@ export class ProjectRepoDb {
         }
     }
 
+    // Métodos para TestSuite (createTestSuite, moveBacklogItem, etc.)
     async createTestSuite(suiteData: NewTestSuite): Promise<TestSuite> {
-    const trx = await this.connection.transaction();
-    try {
-        const [insertedId] = await trx('test_suites').insert({
-            id_ciclo_de_teste: suiteData.id_ciclo_de_teste,
-            titulo: suiteData.titulo,
-            descricao: suiteData.descricao
-        });
+        const trx = await this.connection.transaction();
+        try {
+            const [insertedId] = await trx('test_suites')
+                .insert({
+                    id_ciclo_de_teste: suiteData.id_ciclo_de_teste,
+                    titulo: suiteData.titulo,
+                    descricao: suiteData.descricao
+                });
 
-        const newSuiteId = insertedId;
+            const newSuiteId = insertedId;
 
-        if (suiteData.itemIds && suiteData.itemIds.length > 0) {
-            // *** CORREÇÃO N:N: Insere o vínculo na tabela suite_backlog_items ***
-            const linksToInsert = suiteData.itemIds.map(itemId => ({
-                id_test_suite: newSuiteId,
-                id_backlog_item: itemId
-            }));
-            await trx('suite_backlog_items').insert(linksToInsert);
+            if (suiteData.itemIds && suiteData.itemIds.length > 0) {
+                await trx('backlog_items')
+                    .whereIn('id', suiteData.itemIds)
+                    .update({
+                        id_suite_de_teste: newSuiteId
+                    });
+            }
+            await trx.commit();
+
+            const newSuite = await this.connection('test_suites')
+                .where({ id: newSuiteId })
+                .first();
+
+            if (!newSuite) {
+                throw new Error("Falha ao recuperar a suíte após a criação.");
+            }
+
+            return newSuite as TestSuite;
+
+        } catch (err) {
+            await trx.rollback();
+            console.error("Erro ao criar suíte e mover itens:", err);
+            throw new Error("Falha ao criar suíte de teste.");
         }
-        await trx.commit();
-
-        const newSuite = await this.connection('test_suites')
-            .where({ id: newSuiteId })
-            .first();
-
-        if (!newSuite) {
-            throw new Error("Falha ao recuperar a suíte após a criação.");
-        }
-
-        return newSuite as TestSuite;
-
-    } catch (err) {
-        await trx.rollback();
-        console.error("Erro ao criar suíte e vincular itens:", err);
-        throw new Error("Falha ao criar suíte de teste.");
     }
-}
 
     async moveBacklogItem(itemId: number, newSuiteId: number): Promise<void> {
         await this.connection('backlog_items')
@@ -328,71 +337,37 @@ export class ProjectRepoDb {
     }
 
     async findCicloCompletoById(cicloId: number): Promise<any | null> {
-    const ciclo = await this.connection('ciclos_de_teste').where({ id: cicloId }).first();
-    if (!ciclo) return null;
+        const ciclo = await this.connection('ciclos_de_teste').where({ id: cicloId }).first();
+        if (!ciclo) return null;
 
-    const suites = await this.connection('test_suites')
-        .where({ id_ciclo_de_teste: cicloId })
-        .orderBy('id', 'asc');
+        const suites = await this.connection('test_suites')
+            .where({ id_ciclo_de_teste: cicloId })
+            .orderBy('id', 'asc');
 
-    const itensVinculados = await this.connection('backlog_items as bi')
-        .join('ciclo_backlog_items as cbi', 'bi.id', 'cbi.id_item_backlog')
-        .where('cbi.id_ciclo', cicloId)
-        .select('bi.*');
-
-    // 1. Mapeia cada suíte para uma Promise que busca seus itens (resolvendo o problema de await no map).
-    const suitesComItensPromises = suites.map((suite: TestSuite) => {
-        // Busca os itens vinculados à suíte usando a nova tabela N:N
-        const itensDaSuitePromise = this.connection('backlog_items as bi')
-            .join('suite_backlog_items as sbi', 'bi.id', 'sbi.id_backlog_item')
-            .where('sbi.id_test_suite', suite.id)
+        const itensVinculados = await this.connection('backlog_items as bi')
+            .join('ciclo_backlog_items as cbi', 'bi.id', 'cbi.id_item_backlog')
+            .where('cbi.id_ciclo', cicloId)
             .select('bi.*');
-            
-        return itensDaSuitePromise.then(itensDaSuite => ({
-            ...suite,
-            itens_backlog: itensDaSuite
-        }));
-    });
-    
-    // 2. Aguarda que TODAS as Promises terminem.
-    const suitesComItens = await Promise.all(suitesComItensPromises);
 
-    // 3. Filtra itens não atribuídos: Itens no ciclo que NÃO estão vinculados a NENHUMA suíte.
-    const itemIdsEmSuites = suitesComItens.flatMap(s => s.itens_backlog.map((item: any) => item.id));
+        const suitesComItens = suites.map((suite: TestSuite) => {
+            return {
+                ...suite,
+                itens_backlog: itensVinculados.filter(
+                    (item: BacklogItem) => item.id_suite_de_teste === suite.id
+                )
+            };
+        });
 
-    const itensNaoAtribuidos = itensVinculados.filter(
-        (item: any) => !itemIdsEmSuites.includes(item.id)
-    );
+        const itensNaoAtribuidos = itensVinculados.filter(
+            (item: BacklogItem) => item.id_suite_de_teste === null
+        );
 
-    return {
-        ...ciclo,
-        suites: suitesComItens,
-        itens_nao_atribuidos: itensNaoAtribuidos,
-        itens_backlog: itensVinculados 
-    };
-}
-
-    async saveTestResults(results: NewTestResult[]): Promise<void> {
-        const trx = await this.connection.transaction();
-        try {
-            const dataToInsert = results.map(result => ({
-                id_backlog_item: result.id_backlog_item,
-                id_test_suite: result.id_test_suite,
-                id_ciclo_de_teste: result.id_ciclo_de_teste,
-                id_usuario: result.id_usuario,
-                resultado: result.resultado,
-                descricao: result.resultado === 'falhou' ? result.descricao : null,
-                data_execucao: new Date() 
-            }));
-
-            await trx('test_executions').insert(dataToInsert);
-
-            await trx.commit();
-        } catch (err) {
-            await trx.rollback();
-            console.error("Erro ao salvar resultados de teste (histórico):", err);
-            throw new Error("Falha ao salvar o histórico dos resultados dos testes.");
-        }
+        return {
+            ...ciclo,
+            suites: suitesComItens,
+            itens_nao_atribuidos: itensNaoAtribuidos,
+            itens_backlog: itensVinculados // Incluir todos os itens vinculados também pode ser útil
+        };
     }
 
     async findSuiteById(suiteId: number): Promise<{ id: number, id_ciclo_de_teste: number } | null> {
@@ -404,51 +379,82 @@ export class ProjectRepoDb {
     }
 
     async updateTestSuite(suiteId: number, data: { titulo: string; descricao?: string; itemIds: number[] }): Promise<TestSuite | null> {
-    const trx = await this.connection.transaction();
-    try {
-        // 1. Atualiza os dados da suíte
-        await trx('test_suites')
-            .where({ id: suiteId })
-            .update({
-                titulo: data.titulo,
-                descricao: data.descricao
-            });
+        const trx = await this.connection.transaction();
+        try {
+            // 1. Atualiza os dados da suíte (título e descrição)
+            await trx('test_suites')
+                .where({ id: suiteId })
+                .update({
+                    titulo: data.titulo,
+                    descricao: data.descricao
+                });
 
-        // 2. *** CORREÇÃO N:N: Remove todos os links de backlog antigos desta suíte ***
-        await trx('suite_backlog_items')
-            .where({ id_test_suite: suiteId })
-            .del();
+            // 2. Desvincula todos os itens que *atualmente* pertencem a esta suíte (1:N)
+            await trx('backlog_items')
+                .where({ id_suite_de_teste: suiteId })
+                .update({ id_suite_de_teste: null });
 
-        // 3. *** CORREÇÃO N:N: Vincula os *novos* itens selecionados à suíte ***
-        if (data.itemIds && data.itemIds.length > 0) {
-            const linksToInsert = data.itemIds.map(itemId => ({
-                id_test_suite: suiteId,
-                id_backlog_item: itemId
-            }));
-            await trx('suite_backlog_items').insert(linksToInsert);
+            // 3. Vincula os *novos* itens selecionados a esta suíte (1:N)
+            if (data.itemIds && data.itemIds.length > 0) {
+                await trx('backlog_items')
+                    .whereIn('id', data.itemIds)
+                    .update({ id_suite_de_teste: suiteId });
+            }
+
+            await trx.commit();
+            const updatedSuite = await this.connection('test_suites').where({ id: suiteId }).first();
+            return updatedSuite as TestSuite;
+
+        } catch (err) {
+            await trx.rollback();
+            console.error("Erro ao atualizar suíte de teste:", err);
+            throw new Error("Falha ao atualizar a suíte de teste no banco de dados.");
         }
-
-        await trx.commit();
-        const updatedSuite = await this.connection('test_suites').where({ id: suiteId }).first();
-        return updatedSuite as TestSuite;
-
-    } catch (err) {
-        await trx.rollback();
-        console.error("Erro ao atualizar suíte de teste:", err);
-        throw new Error("Falha ao atualizar a suíte de teste no banco de dados.");
     }
-}
 
     async deleteTestSuite(suiteId: number): Promise<void> {
-    // Não precisa de transação, pois a exclusão da suíte (com ON DELETE CASCADE na tabela N:N)
-    // limpará automaticamente os vínculos na suite_backlog_items, e o backlog_items não é mais afetado.
-    try {
-        await this.connection('test_suites')
-            .where({ id: suiteId })
-            .del();
-    } catch (err) {
-        console.error("Erro ao deletar suíte de teste:", err);
-        throw new Error("Falha ao deletar a suíte de teste.");
+        const trx = await this.connection.transaction();
+        try {
+            // 1. Desvincula todos os itens da suíte (voltando a ser "Não Atribuídos" no modelo 1:N)
+            await trx('backlog_items')
+                .where({ id_suite_de_teste: suiteId })
+                .update({ id_suite_de_teste: null });
+
+            // 2. Exclui a suíte
+            await trx('test_suites')
+                .where({ id: suiteId })
+                .del();
+
+            await trx.commit();
+
+        } catch (err) {
+            await trx.rollback();
+            console.error("Erro ao deletar suíte de teste:", err);
+            throw new Error("Falha ao deletar a suíte de teste.");
+        }
     }
-}
+
+    // Métodos para TestResult (saveTestResults)
+    async saveTestResults(results: NewTestResult[]): Promise<void> {
+        const trx = await this.connection.transaction();
+        try {
+            const dataToInsert = results.map(result => ({
+                id_backlog_item: result.id_backlog_item,
+                id_test_suite: result.id_test_suite,
+                id_ciclo_de_teste: result.id_ciclo_de_teste,
+                id_usuario: result.id_usuario,
+                resultado: result.resultado,
+                descricao: result.resultado === 'falhou' ? result.descricao : null,
+                data_execucao: new Date()
+            }));
+
+            await trx('test_executions').insert(dataToInsert);
+
+            await trx.commit();
+        } catch (err) {
+            await trx.rollback();
+            console.error("Erro ao salvar resultados de teste (histórico):", err);
+            throw new Error("Falha ao salvar o histórico dos resultados dos testes.");
+        }
+    }
 }
