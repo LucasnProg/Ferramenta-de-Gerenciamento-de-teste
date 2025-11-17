@@ -7,14 +7,13 @@ FLUSH PRIVILEGES;
 -- Usa o banco
 USE aplicacao_db;
 
--- tabela de usuários
+-- Tabela de Usuários
 CREATE TABLE IF NOT EXISTS usuarios (
     id VARCHAR(36) PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL
 );
-
 
 -- Tabela de Projetos
 CREATE TABLE IF NOT EXISTS projetos (
@@ -23,7 +22,7 @@ CREATE TABLE IF NOT EXISTS projetos (
     descricao TEXT
 );
 
--- Tabela de Itens do Backlog
+-- Tabela de Itens do Backlog (Sem vínculo direto com suíte aqui)
 CREATE TABLE IF NOT EXISTS backlog_items (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     id_projeto INTEGER NOT NULL,
@@ -43,6 +42,7 @@ CREATE TABLE IF NOT EXISTS ciclos_de_teste (
     CONSTRAINT ciclo_projeto_fk FOREIGN KEY (id_projeto) REFERENCES projetos(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+-- Tabela de Suítes de Teste
 CREATE TABLE IF NOT EXISTS test_suites (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     id_ciclo_de_teste INTEGER NOT NULL,
@@ -51,10 +51,7 @@ CREATE TABLE IF NOT EXISTS test_suites (
     CONSTRAINT suite_ciclo_fk FOREIGN KEY (id_ciclo_de_teste) REFERENCES ciclos_de_teste(id) ON DELETE CASCADE
 );
 
-ALTER TABLE backlog_items
-ADD COLUMN id_suite_de_teste INTEGER NULL,
-ADD CONSTRAINT backlog_suite_fk FOREIGN KEY (id_suite_de_teste) REFERENCES test_suites(id) ON DELETE SET NULL;
-
+-- Tabela de Usuários no Projeto
 CREATE TABLE IF NOT EXISTS usuarios_projeto (
     id_projeto INTEGER,
     id_usuario VARCHAR(36),
@@ -65,9 +62,7 @@ CREATE TABLE IF NOT EXISTS usuarios_projeto (
     CONSTRAINT usuario_fk FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-
-
--- Tabela de ligação (Muitos-para-Muitos) entre Ciclos e Itens do Backlog
+-- Tabela de ligação: Ciclos <-> Itens do Backlog (Escopo geral do ciclo)
 CREATE TABLE IF NOT EXISTS ciclo_backlog_items (
     id_ciclo INTEGER NOT NULL,
     id_item_backlog INTEGER NOT NULL,
@@ -76,6 +71,17 @@ CREATE TABLE IF NOT EXISTS ciclo_backlog_items (
     CONSTRAINT item_backlog_fk FOREIGN KEY (id_item_backlog) REFERENCES backlog_items(id) ON DELETE CASCADE
 );
 
+-- [NOVA] Tabela de ligação N:N: Suítes <-> Itens do Backlog
+-- Permite que o mesmo teste esteja em várias suítes (ex: Smoke e Regressão)
+CREATE TABLE IF NOT EXISTS suite_backlog_items (
+    id_suite INTEGER NOT NULL,
+    id_item_backlog INTEGER NOT NULL,
+    PRIMARY KEY (id_suite, id_item_backlog),
+    CONSTRAINT sbi_suite_fk FOREIGN KEY (id_suite) REFERENCES test_suites(id) ON DELETE CASCADE,
+    CONSTRAINT sbi_item_fk FOREIGN KEY (id_item_backlog) REFERENCES backlog_items(id) ON DELETE CASCADE
+);
+
+-- Tabela de Execuções de Teste
 CREATE TABLE IF NOT EXISTS test_executions (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     id_backlog_item INTEGER NOT NULL,

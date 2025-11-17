@@ -64,16 +64,6 @@ export const ReportTestModal: React.FC<Props> = ({ suite, onClose }) => {
         e.preventDefault();
         setError('');
 
-        const allTestsReportedCheck = suite.itens_backlog.length > 0 && 
-                                    Array.from(results.values()).every(
-                                        result => result.resultado === 'passou' || result.resultado === 'falhou'
-                                    );
-
-        if (!allTestsReportedCheck) {
-            setError("Todos os testes devem ser preenchidos como 'Passou' ou 'Falhou' para salvar.");
-            return;
-        }
-
         if (!user) {
             setError("Autenticação perdida. Faça login novamente.");
             return;
@@ -111,12 +101,6 @@ export const ReportTestModal: React.FC<Props> = ({ suite, onClose }) => {
             setIsSubmitting(false);
         }
     };
-
-    const allTestsReported = suite.itens_backlog.length > 0 && 
-                           results.size === suite.itens_backlog.length &&
-                           Array.from(results.values()).every(
-                               result => result.resultado === 'passou' || result.resultado === 'falhou'
-                           );
 
     return (
         <ModalOverlay onClick={onClose}>
@@ -174,8 +158,8 @@ export const ReportTestModal: React.FC<Props> = ({ suite, onClose }) => {
                         <Button 
                             type="submit" 
                             className="primary" 
-                            disabled={isSubmitting || !allTestsReported}
-                            title={!allTestsReported ? "Preencha todos os resultados para salvar" : "Salvar resultados"}
+                            disabled={isSubmitting}
+                            title={"Salvar resultados"}
                         >
                             {isSubmitting ? 'Salvando...' : 'Salvar Resultados'}
                         </Button>

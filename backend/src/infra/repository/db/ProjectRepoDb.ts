@@ -123,8 +123,7 @@ export class ProjectRepoDb {
         const itemsToInsert = items.map(item => ({
             id_projeto: projectId,
             item: item.item,
-            descricao: item.descricao,
-            id_suite_de_teste: item.id_suite_de_teste || null
+            descricao: item.descricao
         }));
         if (itemsToInsert.length > 0) {
             await this.connection('backlog_items').insert(itemsToInsert);
@@ -171,7 +170,6 @@ export class ProjectRepoDb {
                 id_projeto: projectId,
                 item: itemData.item,
                 descricao: itemData.descricao || null,
-                id_suite_de_teste: null,
                 data_importacao: mysqlCompatibleDateTime
             });
         const newItem = await this.getBacklogItemById(insertedId);
@@ -204,6 +202,7 @@ export class ProjectRepoDb {
                 titulo: novoCiclo.titulo,
                 descricao: novoCiclo.descricao
             });
+            
             if (novoCiclo.itemIds && novoCiclo.itemIds.length > 0) {
                 const links = novoCiclo.itemIds.map(itemId => ({
                     id_ciclo: insertedId,
@@ -251,6 +250,7 @@ export class ProjectRepoDb {
                     titulo: data.titulo,
                     descricao: data.descricao
                 });
+            
             await trx('ciclo_backlog_items')
                 .where({ id_ciclo: cicloId })
                 .del();
@@ -293,11 +293,11 @@ export class ProjectRepoDb {
             const newSuiteId = insertedId;
 
             if (suiteData.itemIds && suiteData.itemIds.length > 0) {
-                await trx('backlog_items')
-                    .whereIn('id', suiteData.itemIds)
-                    .update({
-                        id_suite_de_teste: newSuiteId
-                    });
+                const links = suiteData.itemIds.map(itemId => ({
+                    id_suite: newSuiteId,
+                    id_item_backlog: itemId
+                }));
+                await trx('suite_backlog_items').insert(links);
             }
             await trx.commit();
 
@@ -319,11 +319,16 @@ export class ProjectRepoDb {
     }
 
     async moveBacklogItem(itemId: number, newSuiteId: number): Promise<void> {
-        await this.connection('backlog_items')
-            .where({ id: itemId })
-            .update({
-                id_suite_de_teste: newSuiteId
+        const existing = await this.connection('suite_backlog_items')
+            .where({ id_suite: newSuiteId, id_item_backlog: itemId })
+            .first();
+        
+        if (!existing) {
+            await this.connection('suite_backlog_items').insert({
+                id_suite: newSuiteId,
+                id_item_backlog: itemId
             });
+        }
     }
 
     async findCicloCompletoById(cicloId: number): Promise<any | null> {
@@ -334,29 +339,28 @@ export class ProjectRepoDb {
             .where({ id_ciclo_de_teste: cicloId })
             .orderBy('id', 'asc');
 
-        const itensVinculados = await this.connection('backlog_items as bi')
+        const todosItensDoCiclo = await this.connection('backlog_items as bi')
             .join('ciclo_backlog_items as cbi', 'bi.id', 'cbi.id_item_backlog')
             .where('cbi.id_ciclo', cicloId)
             .select('bi.*');
 
-        const suitesComItens = suites.map((suite: TestSuite) => {
+        const suitesComItens = await Promise.all(suites.map(async (suite: any) => {
+            const itensDaSuite = await this.connection('backlog_items as bi')
+                .join('suite_backlog_items as sbi', 'bi.id', 'sbi.id_item_backlog')
+                .where('sbi.id_suite', suite.id)
+                .select('bi.*');
+            
             return {
                 ...suite,
-                itens_backlog: itensVinculados.filter(
-                    (item: BacklogItem) => item.id_suite_de_teste === suite.id
-                )
+                itens_backlog: itensDaSuite
             };
-        });
-
-        const itensNaoAtribuidos = itensVinculados.filter(
-            (item: BacklogItem) => item.id_suite_de_teste === null
-        );
+        }));
 
         return {
             ...ciclo,
             suites: suitesComItens,
-            itens_nao_atribuidos: itensNaoAtribuidos,
-            itens_backlog: itensVinculados
+            itens_gerais: todosItensDoCiclo,
+            itens_nao_atribuidos: todosItensDoCiclo 
         };
     }
 
@@ -378,14 +382,16 @@ export class ProjectRepoDb {
                     descricao: data.descricao
                 });
 
-            await trx('backlog_items')
-                .where({ id_suite_de_teste: suiteId })
-                .update({ id_suite_de_teste: null });
+            await trx('suite_backlog_items')
+                .where({ id_suite: suiteId })
+                .del();
 
             if (data.itemIds && data.itemIds.length > 0) {
-                await trx('backlog_items')
-                    .whereIn('id', data.itemIds)
-                    .update({ id_suite_de_teste: suiteId });
+                const links = data.itemIds.map(itemId => ({
+                    id_suite: suiteId,
+                    id_item_backlog: itemId
+                }));
+                await trx('suite_backlog_items').insert(links);
             }
 
             await trx.commit();
@@ -402,9 +408,7 @@ export class ProjectRepoDb {
     async deleteTestSuite(suiteId: number): Promise<void> {
         const trx = await this.connection.transaction();
         try {
-            await trx('backlog_items')
-                .where({ id_suite_de_teste: suiteId })
-                .update({ id_suite_de_teste: null });
+            await trx('suite_backlog_items').where({ id_suite: suiteId }).del();
 
             await trx('test_suites')
                 .where({ id: suiteId })
@@ -440,5 +444,21 @@ export class ProjectRepoDb {
             console.error("Erro ao salvar resultados de teste (histórico):", err);
             throw new Error("Falha ao salvar o histórico dos resultados dos testes.");
         }
+    }
+
+    async getTestExecutionsBySuite(suiteId: number): Promise<any[]> {
+        return this.connection('test_executions as te')
+            .join('backlog_items as bi', 'te.id_backlog_item', 'bi.id')
+            .join('usuarios as u', 'te.id_usuario', 'u.id')
+            .where('te.id_test_suite', suiteId)
+            .select(
+                'te.id',
+                'te.resultado',
+                'te.descricao as erro_descricao',
+                'te.data_execucao',
+                'bi.item as nome_teste',
+                'u.name as responsavel'
+            )
+            .orderBy('te.data_execucao', 'desc');
     }
 }

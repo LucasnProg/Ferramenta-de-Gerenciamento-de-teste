@@ -18,6 +18,7 @@ interface CicloDeTesteType {
     id_projeto: number;
     titulo: string;
     descricao?: string;
+    itens_gerais?: BacklogItemType[]; 
     itens_backlog?: BacklogItemType[]; 
 }
 
@@ -35,17 +36,14 @@ export const TestCycleEditModal: React.FC<Props> = ({ ciclo, onClose, onSuccess 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const [selectedItems, setSelectedItems] = useState<number[]>(() => {
-        if (ciclo && ciclo.itens_backlog) {
-            return ciclo.itens_backlog.map((item) => Number(item.id));
-        }
-        return [];
-    });
+    const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
     useEffect(() => {
-        if (ciclo && ciclo.itens_backlog) {
-            const existingIds = ciclo.itens_backlog.map((item) => Number(item.id));
-            console.log("EDIT MODAL - IDs sincronizados:", existingIds);
+        const itensVinculados = ciclo.itens_gerais || ciclo.itens_backlog || [];
+        
+        if (itensVinculados.length > 0) {
+            const existingIds = itensVinculados.map((item) => Number(item.id));
+            console.log("EDIT MODAL - Itens já vinculados:", existingIds);
             setSelectedItems(existingIds);
         }
     }, [ciclo]);
@@ -96,7 +94,7 @@ export const TestCycleEditModal: React.FC<Props> = ({ ciclo, onClose, onSuccess 
                 body: JSON.stringify({
                     titulo,
                     descricao,
-                    itemIds: selectedItems
+                    itemIds: selectedItems 
                 })
             });
 
@@ -127,7 +125,8 @@ export const TestCycleEditModal: React.FC<Props> = ({ ciclo, onClose, onSuccess 
                     <div>
                         <Label htmlFor="titulo">Título do Ciclo</Label>
                         <Input
-                            id="titulo" type="text"
+                            type="text"
+                            placeholder="Insira o novo titulo"
                             value={titulo}
                             onChange={(e) => setTitulo(e.target.value)}
                         />
@@ -160,7 +159,7 @@ export const TestCycleEditModal: React.FC<Props> = ({ ciclo, onClose, onSuccess 
                     {error && <ErrorText>{error}</ErrorText>}
 
                     <ButtonGroup>
-                        <Button type="button" onClick={onClose} styleType="secondary">
+                        <Button type="button" onClick={onClose} style={{ backgroundColor: '#6c757d' }}>
                             Cancelar
                         </Button>
                         <Button type="submit" disabled={loading} style={{ backgroundColor: '#007bff' }}>

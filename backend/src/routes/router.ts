@@ -34,6 +34,7 @@ import { CreateTestSuiteController } from "../controller/CreateTestSuiteControll
 import { MoveBacklogItemController } from "../controller/MoveBacklogItemController";
 import { EditTestSuiteController } from "../controller/EditTestSuiteController";
 import { DeleteTestSuiteController } from "../controller/DeleteTestSuiteController";
+import { GetTestSuiteResults } from "../controller/GetTestSuiteResults";
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -76,6 +77,7 @@ const moveBacklogItemController = new MoveBacklogItemController(projectRepo);
 const reportTestResultsController = new ReportTestResultsController(projectRepo); 
 const editTestSuiteController = new EditTestSuiteController(projectRepo);
 const deleteTestSuiteController = new DeleteTestSuiteController(projectRepo, usersRepository);
+const getTestSuiteResults = new GetTestSuiteResults(projectRepo);
 
 
 // Listar usuários
@@ -305,6 +307,12 @@ router.delete(
     "/suite/:id",
     authMiddleware,
     (req: Request, res: Response) => deleteTestSuiteController.execute(req, res)
+);
+
+router.get(
+    "/suite/:id/results",
+    authMiddleware,
+    (req: Request, res: Response) => getTestSuiteResults.execute(req, res)
 );
 
 export { router };

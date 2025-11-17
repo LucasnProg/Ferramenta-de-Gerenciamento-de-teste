@@ -13,6 +13,7 @@ import EditProjectPage from '../pages/EditProjectPage';
 import ForgotPass from "../pages/ForgotPass";
 import CreateTestCyclePage from "../pages/CreateTestCyclePage";
 import TestCycleDetail from "../pages/TestCycleDetail";
+import TestReport from "../pages/TestReport";
 
 const Private: FC<{ children: React.ReactElement }> = ({ children }) => {
     const { signed } = useAuth();
@@ -35,6 +36,7 @@ const RoutesApp: FC = () => {
                     <Route path="projeto/editar/:id" element={<EditProjectPage />} />
                     <Route path="projeto/:id/novo-ciclo" element={<CreateTestCyclePage />} />
                     <Route path="ciclo-teste/:cicloId" element={<TestCycleDetail />} />
+                    <Route path="ciclo-teste/:cicloId/suite/:suiteId/relatorio" element={<TestReport />} />
                 </Route>
 
                 <Route path="*" element={<Login />} />
