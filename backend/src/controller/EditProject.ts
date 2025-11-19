@@ -34,6 +34,22 @@ export class EditProject {
 
             await this.repository.update(projectId, project);
 
+            const verifyProject = await this.repository.findById(projectId);
+
+            if (!verifyProject) {
+                throw new Error("Erro crítico: O projeto desapareceu após a atualização.");
+            }
+
+            if (titulo !== undefined && verifyProject.getTitulo() !== titulo) {
+                console.error(`Falha de integridade no Título. BD: ${verifyProject.getTitulo()} | Req: ${titulo}`);
+                throw new Error("Falha na verificação de integridade: O título não foi salvo corretamente no banco de dados.");
+            }
+
+            if (descricao !== undefined && verifyProject.getDescricao() !== descricao) {
+                console.error(`Falha de integridade na Descrição.`);
+                throw new Error("Falha na verificação de integridade: A descrição não foi salva corretamente no banco de dados.");
+            }
+
 
             return res.status(200).json({ 
                 message: "Projeto atualizado com sucesso!", 
@@ -42,7 +58,8 @@ export class EditProject {
 
         } catch (error: any) {
             console.error("ERRO AO EDITAR PROJETO:", error.message);
-            return res.status(400).json({ error: error.message || "Erro ao atualizar projeto." });
+            const statusCode = error.message.includes("integridade") ? 500 : 400;
+            return res.status(statusCode).json({ error: error.message || "Erro ao atualizar projeto." });
         }
     }
 }

@@ -453,6 +453,7 @@ export class ProjectRepoDb {
             .where('te.id_test_suite', suiteId)
             .select(
                 'te.id',
+                'te.id_test_suite',
                 'te.resultado',
                 'te.descricao as erro_descricao',
                 'te.data_execucao',
