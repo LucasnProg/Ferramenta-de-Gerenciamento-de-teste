@@ -48,7 +48,7 @@ const ConfirmationModal: React.FC<Props> = ({
             placeholder="Confirme seu E-mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required // Adiciona validação básica do navegador
+            required
           />
           <Input
             type="password"

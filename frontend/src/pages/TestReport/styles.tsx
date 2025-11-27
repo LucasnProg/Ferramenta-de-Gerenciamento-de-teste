@@ -133,3 +133,37 @@ export const EmptyState = styled.div`
   display: flex; justify-content: center; align-items: center; height: 100%;
   color: #888; font-size: 1.2rem;
 `;
+
+export const SectionHeader = styled.h3<{ color: string }>`
+  color: ${props => props.color};
+  margin-bottom: 15px;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+`;
+
+export const PassedCard = styled.div`
+  background-color: #f0fff4; /* Verde bem claro */
+  border-left: 4px solid #28a745; /* Verde sucesso */
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+
+  strong { display: block; font-size: 1.1rem; margin-bottom: 5px; color: #155724; }
+  p { margin: 0; color: #555; font-size: 0.9rem; }
+`;
+
+export const SkippedCard = styled.div`
+  background-color: #fff3cd; /* Amarelo claro */
+  border-left: 4px solid #ffc107; /* Amarelo */
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+
+  strong { display: block; font-size: 1.1rem; color: #856404; }
+`;

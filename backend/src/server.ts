@@ -10,15 +10,12 @@ export class Server {
     this.app = express();
     this.port = parseInt(process.env.PORT || "4000");
 
-    // Middlewares
     this.app.use(json());
 
-    // CORS
     this.app.use(cors({
       origin: '*'  
     }));
 
-    // Rotas
     this.app.use(router);
   }
 

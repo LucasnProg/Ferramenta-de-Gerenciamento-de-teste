@@ -47,8 +47,7 @@ export class GetTestSuiteResults {
                 
                 let group = groupedReports.find(g => {
                     const groupDate = new Date(g.data);
-                    const diff = Math.abs(execDate.getTime() - groupDate.getTime());
-                    return diff < 2 * 60 * 1000; 
+                    return execDate.getTime() === groupDate.getTime();
                 });
 
                 if (!group) {

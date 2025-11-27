@@ -33,7 +33,21 @@ export class ReportTestResultsController {
                 id_usuario: user.getId().getValue()
             }));
 
-            await this.repository.saveTestResults(resultsToSave);
+            //await this.repository.saveTestResults(resultsToSave);
+
+            const savedExecutions = await this.repository.getTestExecutionsBySuite(Number(suiteId));
+            const recentSaves = savedExecutions.slice(0, resultsToSave.length);
+
+            if (recentSaves.length !== resultsToSave.length) {
+                console.error(`Falha de integridade: Tentou salvar ${resultsToSave.length}, mas banco retornou divergência.`);
+                throw new Error("Falha de integridade: Os resultados do teste não foram persistidos corretamente.");
+            }
+
+            if (recentSaves.length > 0 && recentSaves[0].responsavel !== user.getName()) {
+                 console.error(`Falha de integridade: O registro encontrado não pertence ao usuário atual.`);
+                 throw new Error("Falha de integridade: Erro na atribuição do resultado.");
+            }
+
             res.status(201).json({ message: "Resultados salvos com sucesso." });
 
         } catch (error: any) {

@@ -1,6 +1,5 @@
 import { createContext, useEffect, useState, FC, ReactNode } from "react";
 
-// Tipagem do usuário
 export interface User {
   id: string;
   name: string;
@@ -8,7 +7,6 @@ export interface User {
   senha?: string;
 }
 
-// Contexto de autenticação
 interface AuthContextType {
   user: User | null;
   signed: boolean;
@@ -47,7 +45,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     });
   };
 
-  // Login
   const login = async (email: string, password: string): Promise<string | void> => {
     try {
 
@@ -67,7 +64,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Cadastro
   const cadastro = async (name: string, email: string, password: string) => {
     try {
       const res = await fetch("http://localhost:4000/usuario", {

@@ -61,7 +61,6 @@ const ProjectEditModal: React.FC<EditModalProps> = ({ project, onClose, onSucces
       }
 
       const data = await response.json();
-            // Passa apenas os campos atualizados
       onSuccess({ titulo: data.project.titulo, descricao: data.project.descricao });
       onClose();
 

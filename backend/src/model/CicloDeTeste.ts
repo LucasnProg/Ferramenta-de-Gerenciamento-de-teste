@@ -6,12 +6,12 @@ export interface CicloDeTeste {
     titulo: string;
     descricao?: string;
     data_criacao: Date;
-    itens_backlog?: BacklogItem[]; // Armazena os itens vinculados
+    itens_backlog?: BacklogItem[];
 }
 
 export interface NewCicloDeTeste {
     titulo: string;
     descricao?: string;
     id_projeto: number;
-    itemIds: number[]; // IDs dos itens de backlog a serem vinculados
+    itemIds: number[];
 }

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { NavLink } from 'react-router-dom'; // Trocado para NavLink para estilizar link ativo
+import { NavLink } from 'react-router-dom';
 
 export const Container = styled.aside`
   width: 260px;
@@ -32,7 +32,6 @@ export const Title = styled.h1`
     margin-top: 10px;
 `;
 
-// Alterado para ser um flex container e acomodar o ícone
 export const NavItem = styled(NavLink)`
   padding: 1rem 1.5rem;
   text-decoration: none;
@@ -63,7 +62,6 @@ export const NavItem = styled(NavLink)`
   }
 `;
 
-// Novo NavItem com estilo de perigo
 export const DangerNavItem = styled(NavItem)`
   &:hover {
     border-left: 4px solid #e74c3c;

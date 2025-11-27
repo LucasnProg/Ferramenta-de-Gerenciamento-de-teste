@@ -16,9 +16,9 @@ const PieChart = ({ passed, failed, skipped }: { passed: number, failed: number,
     let cumulativePercent = 0;
     
     const slices = [
-        { percent: passed / total, color: '#28a745' }, // Verde
-        { percent: failed / total, color: '#dc3545' }, // Vermelho
-        { percent: skipped / total, color: '#ffc107' } // Amarelo
+        { percent: passed / total, color: '#28a745' },
+        { percent: failed / total, color: '#dc3545' },
+        { percent: skipped / total, color: '#ffc107' }
     ].map(slice => {
         const [startX, startY] = getCoordinatesForPercent(cumulativePercent);
         cumulativePercent += slice.percent;
@@ -70,6 +70,10 @@ const TestReport: React.FC = () => {
         });
     };
 
+    const failedTests = selectedReport ? selectedReport.testes.filter((t: any) => t.resultado === 'falhou') : [];
+    const passedTests = selectedReport ? selectedReport.testes.filter((t: any) => t.resultado === 'passou') : [];
+    const skippedTests = selectedReport ? selectedReport.testes.filter((t: any) => t.resultado === 'nao_testado') : [];
+
     return (
         <S.Container>
             <S.Header>
@@ -117,21 +121,46 @@ const TestReport: React.FC = () => {
                                 </S.LegendContainer>
                             </S.StatsContainer>
 
-                            <S.FailedTestsContainer>
-                                <h3>Testes que Falharam ({selectedReport.falhou})</h3>
-                                {selectedReport.testes.filter((t: any) => t.resultado === 'falhou').length === 0 && (
-                                    <p style={{ color: '#28a745' }}>Nenhum teste falhou nesta execução. Parabéns!</p>
-                                )}
-                                {selectedReport.testes
-                                    .filter((t: any) => t.resultado === 'falhou')
-                                    .map((test: any) => (
+                            {failedTests.length > 0 && (
+                                <div>
+                                    <S.SectionHeader color="#d9534f">
+                                        Testes que Falharam ({failedTests.length})
+                                    </S.SectionHeader>
+                                    {failedTests.map((test: any) => (
                                         <S.FailedCard key={test.id}>
                                             <strong>{test.nome_teste}</strong>
-                                            <p>{test.erro_descricao || "Sem descrição do erro."}</p>
+                                            <p>{test.erro_descricao || 'Sem descrição do erro.'}</p>
                                         </S.FailedCard>
-                                    ))
-                                }
-                            </S.FailedTestsContainer>
+                                    ))}
+                                </div>
+                            )}
+
+                            {passedTests.length > 0 && (
+                                <div>
+                                    <S.SectionHeader color="#28a745">
+                                        Testes que Passaram ({passedTests.length})
+                                    </S.SectionHeader>
+                                    {passedTests.map((test: any) => (
+                                        <S.PassedCard key={test.id}>
+                                            <strong>{test.nome_teste}</strong>
+                                            <p>Executado com sucesso.</p>
+                                        </S.PassedCard>
+                                    ))}
+                                </div>
+                            )}
+
+                            {skippedTests.length > 0 && (
+                                <div>
+                                    <S.SectionHeader color="#856404">
+                                        Não Testados ({skippedTests.length})
+                                    </S.SectionHeader>
+                                    {skippedTests.map((test: any) => (
+                                        <S.SkippedCard key={test.id}>
+                                            <strong>{test.nome_teste}</strong>
+                                        </S.SkippedCard>
+                                    ))}
+                                </div>
+                            )}
                         </>
                     ) : (
                         <S.EmptyState>Selecione um relatório ao lado para ver os detalhes.</S.EmptyState>

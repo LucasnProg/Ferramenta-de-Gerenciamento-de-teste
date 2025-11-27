@@ -56,7 +56,6 @@ export class Usuario {
     }
 
     static checkName(value: string): boolean {
-        // Regex que permite apenas letras (maiúsculas e minúsculas) e espaços
         const nameRegex = /^[a-zA-Z\s]+$/;
         return nameRegex.test(value);
     }
@@ -71,9 +70,7 @@ export class Usuario {
         return new Usuario(name, email, encryptedPassword, id);
     }
 
-    // Regex básico para senha forte
     static checkPassword(value: string): boolean {
-        // Exige: 1 minúscula, 1 maiúscula, 1 número, e no mínimo 8 caracteres
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
         return passwordRegex.test(value);
     }

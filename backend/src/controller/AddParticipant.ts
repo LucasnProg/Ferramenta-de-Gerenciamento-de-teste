@@ -30,14 +30,13 @@ export class AddParticipant {
         }
 
         try {
-            // 1. Verifica se o projeto existe e se o usuário requisitante é o gerente
             const project = await this.projectRepository.findById(projectId);
             if (!project) {
                 return res.status(404).json({ error: "Projeto não encontrado." });
             }
             if (project.getId() !== projectId) {
                 console.error(`[VERIFICAÇÃO FALHOU] ID da URL (${projectId}) diferente do ID do projeto encontrado (${project.getId()}).`);
-                throw new Error("Falha na verificação interna do ID do projeto."); // Lança um erro interno genérico
+                throw new Error("Falha na verificação interna do ID do projeto.");
             }
             const participants = project.getParticipantes();
             const manager = participants.find(p => p.role.toLowerCase() === 'gerente');
@@ -45,7 +44,6 @@ export class AddParticipant {
                 return res.status(403).json({ error: "Apenas o gerente pode adicionar participantes." });
             }
 
-            // 2. Verifica se o email a ser adicionado existe no sistema
             const userToAdd = await this.userRepository.findByEmail(email);
             if (!userToAdd) {
                 return res.status(404).json({ error: "Usuário com este email não encontrado no sistema." });
@@ -57,7 +55,6 @@ export class AddParticipant {
                 return res.status(409).json({ error: "Este usuário já é participante do projeto." }); 
             }
 
-            // 3. Adiciona o participante ao projeto 
             await this.projectRepository.addParticipant(projectId, userIdToAdd, role);
 
             res.status(200).json({ message: "Participante adicionado com sucesso!" });

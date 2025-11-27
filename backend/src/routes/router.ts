@@ -80,13 +80,11 @@ const deleteTestSuiteController = new DeleteTestSuiteController(projectRepo, use
 const getTestSuiteResults = new GetTestSuiteResults(projectRepo);
 
 
-// Listar usuários
 router.get("/usuarios", (req: Request, res: Response) => {
   usersList.execute(req, res);
 });
 
 
-// Criar usuário
 router.post("/usuario", async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
   metricsService.incrementRegistrationAttempt();
@@ -115,43 +113,36 @@ router.post("/usuario", async (req: Request, res: Response) => {
 });
 
 
-// Login
 router.post("/login", (req: Request, res: Response) => {
     loginUser.execute(req, res);
 });
 
 
-// Editar usuario
 router.put("/usuario/:id", (req: Request, res: Response) => {
     editUser.execute(req, res);
 });
 
 
-// Excluir usuário
 router.delete("/usuario/:id", (req: Request, res: Response) => {
     deleteUser.execute(req, res);
 });
 
 
-// Verificar Email Usuário
 router.get("/check-email", (req: Request, res: Response) => {
     checkEmail.execute(req, res);
 });
 
 
-// Troca a senha quando o usuário esquece
 router.post("/esqueceu-a-senha", (req: Request, res: Response) => {
     resetPass.execute(req, res);
 });
 
 
-// Excluir Projeto
 router.delete('/projeto/:id', authMiddleware, (req: Request, res: Response) => {
     deleteProjectController.execute(req, res)
 });
 
 
-// Adicionar Participante ao Projeto
 router.post("/projeto/:id/participante", authMiddleware, (req: Request, res: Response) => addParticipant.execute(req, res));
 
 

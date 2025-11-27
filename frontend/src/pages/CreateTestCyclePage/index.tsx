@@ -52,7 +52,6 @@ const CreateTestCyclePage: React.FC = () => {
     );
   };
 
-  // 3. Envia o formulário
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!titulo || selectedItems.length === 0) {

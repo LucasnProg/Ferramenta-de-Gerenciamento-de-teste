@@ -15,7 +15,6 @@ export class ListProjectsByUser {
       const userId = user.getId().getValue();
       const projetos = await this.repository.findByUserId(userId);
       
-      // Mapeia para um formato mais simples para o frontend
       const projetosSimples = projetos.map(p => ({
         id: p.getId(),
         titulo: p.getTitulo(),

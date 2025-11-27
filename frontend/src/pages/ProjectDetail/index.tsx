@@ -93,9 +93,6 @@ const ProjectDetail: React.FC = () => {
   const defaultTab = location.state?.defaultTab || 'dashboard'; 
   const [activeTab, setActiveTab] = useState(defaultTab);
 
-
-
-
   const fetchProject = useCallback(async () => {
     if (!projectId || !user) return;
     try {
@@ -228,23 +225,16 @@ const ProjectDetail: React.FC = () => {
 
   const handleEditBacklogItem = (item: BacklogItem) => {
         setEditingItem(item);
-    };
-
-
-
-
+  };
+  
   const handleDeleteBacklogItem = async (itemId: number) => {
         if (!window.confirm("Tem certeza que deseja excluir este item do backlog? Esta ação não pode ser desfeita.")) {
             return;
         }
-
-
         if (!user) {
             alert("Erro de autenticação. Por favor, faça login.");
             return;
         }
-
-
         try {
             const response = await fetch(`http://localhost:4000/backlog/${itemId}`, {
                 method: 'DELETE',
@@ -252,24 +242,17 @@ const ProjectDetail: React.FC = () => {
                     'user-id': user.id
                 }
             });
-
-
             const data = await response.json();
-
-
             if (!response.ok) {
                 throw new Error(data.error || "Falha ao excluir o item.");
             }
-
-
             setBacklogItems(prevItems => prevItems.filter(item => item.id !== itemId));
             alert(data.message || "Item excluído com sucesso.");
         } catch (err: any) {
             console.error("Erro ao excluir item:", err);
             alert(`Erro: ${err.message}`);
         }
-    };
-
+  };
 
   const handleItemUpdated = (updatedItem: BacklogItem) => {
         setBacklogItems(prevItems =>
@@ -278,7 +261,7 @@ const ProjectDetail: React.FC = () => {
             )
         );
         setEditingItem(null);
-    };
+  };
 
 
     const handleItemAdded = (newItem: BacklogItem) => {
@@ -421,7 +404,6 @@ const handleReorderItem = (itemId: number, direction: 'up' | 'down') => {
            <BacklogTable>
                     <thead>
                         <BacklogTr>
-                            {/*<BacklogTh style={{ width: '10%', textAlign: 'center' }}>Prioridade</BacklogTh>*/}
                             <BacklogTh style={{ width: '25%' }}>Item</BacklogTh>
                             <BacklogTh style={{ width: '45%' }}>Descrição</BacklogTh>
                             <BacklogTh style={{ width: '10%', textAlign: 'center' }}>Ações</BacklogTh>
@@ -430,7 +412,6 @@ const handleReorderItem = (itemId: number, direction: 'up' | 'down') => {
                     <tbody>
                         {backlogItems.map((item, index) => (
                             <BacklogTr key={item.id}>
-                                {/*<BacklogTd data-label="Prioridade">{index + 1}</BacklogTd>*/}
                                 <BacklogTd data-label="Item" title={item.item}>{item.item}</BacklogTd>
                                 <BacklogTd data-label="Descrição" title={item.descricao || ''}>
                                    {item.descricao || '-'}

@@ -17,7 +17,6 @@ const config = {
 
 export const db = knex(config);
 
-// Função para testar conexão com retry
 export const connectWithRetry = async (retries = 5, delay = 5000) => {
   for (let i = 0; i < retries; i++) {
     try {
