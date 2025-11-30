@@ -33,7 +33,7 @@ export class ReportTestResultsController {
                 id_usuario: user.getId().getValue()
             }));
 
-            //await this.repository.saveTestResults(resultsToSave);
+            await this.repository.saveTestResults(resultsToSave);
 
             const savedExecutions = await this.repository.getTestExecutionsBySuite(Number(suiteId));
             const recentSaves = savedExecutions.slice(0, resultsToSave.length);
